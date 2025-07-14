@@ -1,5 +1,7 @@
 package dev.namph.redis.resp;
 
+import java.util.List;
+
 public interface ProtocolEncoder {
     /**
      * Encodes an error message into the RESP protocol format.
@@ -23,7 +25,7 @@ public interface ProtocolEncoder {
      * @param bulkString The bulk string to encode.
      * @return The encoded bulk string as a byte array.
      */
-    byte[] encodeBulkString(byte[] bulkString);
+    byte[] encodeBulkString(String bulkString);
 
     /**
      * Encodes a simple string into the RESP protocol format.
@@ -31,5 +33,13 @@ public interface ProtocolEncoder {
      * @param simpleString The simple string to encode.
      * @return The encoded simple string as a byte array.
      */
-    byte[] encodeSimpleString(byte[] simpleString);
+    byte[] encodeSimpleString(String simpleString);
+
+    /**
+     * Encodes list into the RESP protocol format.
+     *
+     * @param list The list to encode,
+     * @return The encoded array as a byte array.
+     */
+    byte[] encodeArray(List list);
 }

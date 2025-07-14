@@ -1,8 +1,7 @@
 package dev.namph.redis.resp;
 
-import dev.namph.redis.util.Res2pSyntax;
+import dev.namph.redis.util.Resp2Syntax;
 import org.slf4j.Logger;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ public class Resp2Parser implements ProtocolParser{
 
         byteQueue.mark();
         byte firstByte = byteQueue.peek();
-        if (firstByte != Res2pSyntax.ARRAY_PREFIX) {
+        if (firstByte != Resp2Syntax.ARRAY_PREFIX) {
             String errorMessage = "Protocol error: expected Array('*'), got: " + (char) firstByte;
             logger.error(errorMessage);
             return ParseResult.error(errorMessage);
@@ -51,7 +50,7 @@ public class Resp2Parser implements ProtocolParser{
             }
 
             byte argPrefix = byteQueue.readByte();
-            if (argPrefix != Res2pSyntax.BULK_STRING_PREFIX) {
+            if (argPrefix != Resp2Syntax.BULK_STRING_PREFIX) {
                 String errorMessage = "Protocol error: expected Bulk String('$'), got: " + (char) argPrefix;
                 logger.error(errorMessage);
                 return ParseResult.error(errorMessage);
