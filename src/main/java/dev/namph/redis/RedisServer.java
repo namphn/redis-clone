@@ -1,5 +1,6 @@
 package dev.namph.redis;
 
+import dev.namph.redis.net.Connection;
 import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -26,6 +27,11 @@ public class RedisServer {
         this.port = port != null ? port : DEFAULT_PORT;
     }
 
+    /**
+     * Starts the Redis server.
+     * It opens a selector and a server socket channel, binds to the specified port,
+     * and listens for incoming connections.
+     */
     public void start() {
         try {
             selector = Selector.open();
@@ -47,9 +53,24 @@ public class RedisServer {
 
                     if (!key.isValid()) continue;
 
+                    // Accept a new connection
                     if (key.isAcceptable()) {
-                        // Accept a new connection
                         acceptConnection();
+                    }
+
+                    // Handle readable connections
+                    if (key.isReadable()) {
+                        Connection connection = (Connection) key.attachment();
+                        if (connection != null) {
+                            try {
+                                connection.onReadable();
+                            } catch (IOException e) {
+                                logger.error("Error reading from connection", e);
+                                key.cancel(); // Cancel the key if there's an error
+                            }
+                        } else {
+                            logger.warn("Connection attachment is null for key: " + key);
+                        }
                     }
                 }
             }
@@ -59,15 +80,22 @@ public class RedisServer {
         }
     }
 
+    /**
+     * Accepts a new connection from a client.
+     * Configures the client channel to non-blocking mode and registers it with the selector.
+     */
     private void acceptConnection() throws IOException {
         var clientChannel = channel.accept();
         if (clientChannel == null) {
             logger.warn("Failed to accept connection: clientChannel is null");
             return;
         }
+        logger.info("Accepted new connection from " + clientChannel.getRemoteAddress());
 
         clientChannel.configureBlocking(false);
-        clientChannel.register(selector, SelectionKey.OP_READ);
-        logger.info("Accepted new connection from " + clientChannel.getRemoteAddress());
+        SelectionKey selectionKey = clientChannel.register(selector, SelectionKey.OP_READ);
+        Connection connection = new Connection(selectionKey, clientChannel);
+        selectionKey.attach(connection);
+        logger.info("Registered new connection with selector");
     }
 }
