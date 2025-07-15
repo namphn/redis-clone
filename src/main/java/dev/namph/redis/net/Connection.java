@@ -11,6 +11,8 @@ import java.nio.channels.SocketChannel;
 public class Connection {
     private SelectionKey key;
     private SocketChannel channel;
+    private ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE); // 8KB read buffer
+    private ByteQueue byteQueue = new ByteQueue(BYTE_QUEUE_SIZE); // ByteQueue to hold read data
 
     // allocated 8KB = 2 blocks of 4KB each, which is a common size for network buffers
     private static final int BUFFER_SIZE = 8192;
@@ -30,14 +32,26 @@ public class Connection {
 
     public void onReadable() throws IOException {
         int n;
-        ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-        ByteQueue queue = new ByteQueue(BYTE_QUEUE_SIZE);
         while ((n = channel.read(readBuffer)) > 0) {
             readBuffer.flip(); // Prepare buffer for reading
-            queue.append(readBuffer);
+            byteQueue.append(readBuffer);
             readBuffer.clear(); // Clear buffer for next read
         }
+        if (n == -1) {
+            closeConnection();
+            return;
+        }
         logger.info("Read " + n + " bytes from " + channel.getRemoteAddress());
-        logger.info("Queue value: " + queue.readString());
+        logger.info("Queue value: " + byteQueue.readString());
+    }
+
+    /**
+     * Closes the connection.
+     * This method is called when the channel is ready for writing.
+     */
+    private void closeConnection() throws IOException {
+        logger.info("Closing connection to " + channel.getRemoteAddress());
+        channel.close();
+        key.cancel();
     }
 }
