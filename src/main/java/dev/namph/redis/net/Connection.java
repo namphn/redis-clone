@@ -1,6 +1,8 @@
 package dev.namph.redis.net;
 
 import dev.namph.redis.resp.ByteQueue;
+import dev.namph.redis.resp.ProtocolParser;
+import dev.namph.redis.resp.Resp2Parser;
 import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -18,6 +20,7 @@ public class Connection {
     // size of the byte queue. double the buffer size to accommodate larger data transfers
     private static final int BYTE_QUEUE_SIZE = 8192 * 2;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(Connection.class);
+    private ProtocolParser parser;
 
     /**
      * Constructor for Connection.
@@ -27,6 +30,7 @@ public class Connection {
     public Connection(SelectionKey key, SocketChannel channel) {
         this.key = key;
         this.channel = channel;
+        parser = new Resp2Parser();
     }
 
     /**
@@ -49,6 +53,27 @@ public class Connection {
         }
         logger.info("Read " + n + " bytes from " + channel.getRemoteAddress());
         logger.info("Queue value: " + byteQueue.readString());
+
+        // parse and process the command
+        while (true) {
+            var parseResult = parser.tryParseCommand(byteQueue);
+            switch (parseResult.type()) {
+                case IM_COMPLETE -> {
+                    return; // Incomplete command, wait for more data
+                }
+                case ERROR -> {
+                    // Handle error in parsing
+                    logger.error("Error parsing command: " + parseResult.message());
+                    closeConnection();
+                    return;
+                }
+                default -> {
+                    // Incomplete command, wait for more data
+                    logger.info("Incomplete command, waiting for more data");
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -59,5 +84,15 @@ public class Connection {
         logger.info("Closing connection to " + channel.getRemoteAddress());
         channel.close();
         key.cancel();
+    }
+
+    /**
+     * Enables the write operation for this connection.
+     * This method sets the interest ops of the key to include OP_WRITE
+     * and wakes up the selector to process the write operation.
+     */
+    private void enableWrite() {
+        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+        key.selector().wakeup();
     }
 }
