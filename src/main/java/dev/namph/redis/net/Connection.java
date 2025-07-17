@@ -2,7 +2,6 @@ package dev.namph.redis.net;
 
 import dev.namph.redis.resp.ByteQueue;
 import org.slf4j.Logger;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -30,6 +29,13 @@ public class Connection {
         this.channel = channel;
     }
 
+    /**
+     * Handles the readable event for this connection.
+     * This method reads data from the channel into the read buffer,
+     * appends it to the byte queue, and processes the data.
+     *
+     * @throws IOException if an I/O error occurs while reading from the channel.
+     */
     public void onReadable() throws IOException {
         int n;
         while ((n = channel.read(readBuffer)) > 0) {
