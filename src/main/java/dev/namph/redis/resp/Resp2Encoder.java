@@ -29,7 +29,7 @@ public class Resp2Encoder implements ProtocolEncoder{
         if (bulkString == null) {
             throw new IllegalArgumentException("Bulk string cannot be null");
         }
-        byte[] bulkBytes = bulkString.getBytes();
+        byte[] bulkBytes = (bulkString.length() + bulkString).getBytes();
         return joinByte(Resp2Syntax.BULK_STRING_PREFIX, bulkBytes);
     }
 
