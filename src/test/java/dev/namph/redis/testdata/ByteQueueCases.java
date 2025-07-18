@@ -7,6 +7,10 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
+/**
+ * Provides test cases for the ByteQueue class, specifically for reading lines from a byte queue.
+ * Each case consists of input data and expected output lines.
+ */
 public class ByteQueueCases implements ArgumentsProvider {
 
     @Override
