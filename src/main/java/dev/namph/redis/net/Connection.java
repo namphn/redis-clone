@@ -73,6 +73,12 @@ public class Connection {
                     enableWrite(); // Enable write operation to send the error response
                     return;
                 }
+                case COMMAND -> {
+                    // Process the command
+                    logger.info("Received command: " + parseResult.args());
+
+                    enableWrite(); // Enable write operation to send the response
+                }
                 default -> {
                     // Incomplete command, wait for more data
                     logger.info("Incomplete command, waiting for more data");
