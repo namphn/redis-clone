@@ -21,6 +21,7 @@ public class Resp2Parser implements ProtocolParser{
         if (firstByte != Resp2Syntax.ARRAY_PREFIX) {
             String errorMessage = "Protocol error: expected Array('*'), got: " + (char) firstByte;
             logger.error(errorMessage);
+            byteQueue.resetToMark();
             return ParseResult.error(errorMessage);
         }
 
@@ -28,7 +29,7 @@ public class Resp2Parser implements ProtocolParser{
 
         byte[] lengthBytes = byteQueue.readLine();
         if (lengthBytes == null || lengthBytes.length == 0) {
-            logger.info("imcomplete: no length bytes found after Array('*')");
+            logger.info("incomplete: no length bytes found after Array('*')");
             byteQueue.resetToMark();
             return ParseResult.IM_COMPLETE;
         }
@@ -44,7 +45,7 @@ public class Resp2Parser implements ProtocolParser{
         List<byte[]> listArgs = new ArrayList<>();
         for (int i = 0; i < argvCount; i++) {
             if (byteQueue.readAvailable() == 0) {
-                logger.info("imcomplete: no more data available for argument " + (i + 1));
+                logger.info("incomplete: no more data available for argument " + (i + 1));
                 byteQueue.resetToMark();
                 return ParseResult.IM_COMPLETE;
             }
@@ -57,7 +58,7 @@ public class Resp2Parser implements ProtocolParser{
             }
             byte[] argLengthBytes = byteQueue.readLine();
             if (argLengthBytes == null || argLengthBytes.length == 0) {
-                logger.info("imcomplete: no length bytes found for argument " + (i + 1));
+                logger.info("incomplete: no length bytes found for argument " + (i + 1));
                 byteQueue.resetToMark();
                 return ParseResult.IM_COMPLETE;
             }
@@ -80,14 +81,14 @@ public class Resp2Parser implements ProtocolParser{
 
             byte[] argBytes = byteQueue.readBytes(argLength);
             if (argBytes == null || argBytes.length != argLength) {
-                logger.info("imcomplete : expected " + argLength + " bytes for argument " + (i + 1) + ", but got less");
+                logger.info("incomplete : expected " + argLength + " bytes for argument " + (i + 1) + ", but got less");
                 byteQueue.resetToMark();
                 return ParseResult.IM_COMPLETE;
             }
 
             byte[] crlf = byteQueue.readBytes(2); // consume the CRLF after the bulk string
             if (crlf == null || crlf.length != 2) {
-                logger.info("imcomplete: no CRLF found after Bulk String");
+                logger.info("incomplete: no CRLF found after Bulk String");
                 byteQueue.resetToMark();
                 return ParseResult.IM_COMPLETE;
             }

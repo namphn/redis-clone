@@ -1,13 +1,13 @@
 package dev.namph.redis.net;
 
-import dev.namph.redis.resp.ByteQueue;
-import dev.namph.redis.resp.ProtocolParser;
-import dev.namph.redis.resp.Resp2Parser;
+import dev.namph.redis.resp.*;
 import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class Connection {
     private SelectionKey key;
@@ -21,6 +21,8 @@ public class Connection {
     private static final int BYTE_QUEUE_SIZE = 8192 * 2;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(Connection.class);
     private ProtocolParser parser;
+    private Deque<ByteBuffer> writeQueue; // Queue for write operations
+    private ProtocolEncoder encoder;
 
     /**
      * Constructor for Connection.
@@ -31,6 +33,8 @@ public class Connection {
         this.key = key;
         this.channel = channel;
         parser = new Resp2Parser();
+        writeQueue = new ArrayDeque<>();
+        encoder = new Resp2Encoder();
     }
 
     /**
@@ -64,7 +68,9 @@ public class Connection {
                 case ERROR -> {
                     // Handle error in parsing
                     logger.error("Error parsing command: " + parseResult.message());
-                    closeConnection();
+                    var errorResponse = encoder.encodeError(parseResult.message());
+                    enqueueWrite(errorResponse);
+                    enableWrite(); // Enable write operation to send the error response
                     return;
                 }
                 default -> {
@@ -77,13 +83,44 @@ public class Connection {
     }
 
     /**
+     * Handles the writable event for this connection.
+     * This method writes data from the write queue to the channel.
+     *
+     * @throws IOException if an I/O error occurs while writing to the channel.
+     */
+    public void onWritable() throws IOException {
+        if (writeQueue.isEmpty()) {
+            logger.info("No data to write for " + channel.getRemoteAddress());
+            disableWrite(); // Disable write operation if there's nothing to write
+            return;
+        }
+
+        while (!writeQueue.isEmpty()) {
+            ByteBuffer buffer = writeQueue.peek();
+            if (buffer == null || !buffer.hasRemaining()) {
+                writeQueue.poll(); // Remove empty buffers
+                continue;
+            }
+            int bytesWritten = channel.write(buffer);
+            logger.info("Wrote " + bytesWritten + " bytes to " + channel.getRemoteAddress());
+            if (bytesWritten <= 0) {
+                break; // No more data can be written at the moment
+            }
+        }
+    }
+
+    /**
      * Closes the connection.
      * This method is called when the channel is ready for writing.
      */
     private void closeConnection() throws IOException {
         logger.info("Closing connection to " + channel.getRemoteAddress());
-        channel.close();
-        key.cancel();
+        try {
+            channel.close();
+            key.cancel();
+        } catch (Exception e) {
+            logger.error("Error closing connection to " + channel.getRemoteAddress(), e);
+        }
     }
 
     /**
@@ -93,6 +130,23 @@ public class Connection {
      */
     private void enableWrite() {
         key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+        key.selector().wakeup();
+    }
+
+    private void enqueueWrite(byte[] bytes) throws IOException {
+        enqueueWrite(ByteBuffer.wrap(bytes));
+    }
+
+    private void enqueueWrite(ByteBuffer buffer) throws IOException {
+        if (buffer == null || buffer.remaining() == 0) {
+            logger.warn("from client" + channel.getRemoteAddress() + ": Attempted to enqueue an empty buffer for writing.");
+            return;
+        }
+        writeQueue.offer(buffer);
+    }
+
+    private void disableWrite() {
+        key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
         key.selector().wakeup();
     }
 }

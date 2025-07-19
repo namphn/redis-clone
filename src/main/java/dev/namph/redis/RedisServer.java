@@ -59,13 +59,28 @@ public class RedisServer {
                     }
 
                     // Handle readable connections
-                    if (key.isReadable()) {
+                    if (key.isValid() && key.isReadable()) {
                         Connection connection = (Connection) key.attachment();
                         if (connection != null) {
                             try {
                                 connection.onReadable();
                             } catch (IOException e) {
                                 logger.error("Error reading from connection", e);
+                                key.cancel(); // Cancel the key if there's an error
+                            }
+                        } else {
+                            logger.warn("Connection attachment is null for key: " + key);
+                        }
+                    }
+
+                    // Handle writable connections
+                    if (key.isValid() && key.isWritable()) {
+                        Connection connection = (Connection) key.attachment();
+                        if (connection != null) {
+                            try {
+                                connection.onWritable();
+                            } catch (IOException e) {
+                                logger.error("Error writing to connection", e);
                                 key.cancel(); // Cancel the key if there's an error
                             }
                         } else {
