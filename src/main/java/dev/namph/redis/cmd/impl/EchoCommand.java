@@ -8,6 +8,9 @@ import dev.namph.redis.util.Singleton;
 
 import java.util.List;
 
+/**
+ * The ECHO command is used to return the input string to the client.
+ */
 @Cmd(name = "ECHO", minArgs = 2)
 public class EchoCommand implements RedisCommand {
     private ProtocolEncoder encoder = Singleton.getResp2Encoder();

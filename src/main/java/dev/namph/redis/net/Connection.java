@@ -81,7 +81,7 @@ public class Connection {
                 }
                 case COMMAND -> {
                     // Process the command
-                    logger.info("Received command: " + parseResult.args());
+                    logger.info("Received command");
                     byte[] res = commandRegistry.dispatch(this, parseResult.args());
                     enqueueWrite(res);
                     enableWrite(); // Enable write operation to send the response
@@ -144,10 +144,24 @@ public class Connection {
         key.selector().wakeup();
     }
 
+    /**
+     * Enqueues a byte array for writing.
+     * This method wraps the byte array in a ByteBuffer and adds it to the write queue.
+     *
+     * @param bytes the byte array to enqueue for writing.
+     * @throws IOException if an I/O error occurs while enqueuing the write operation.
+     */
     private void enqueueWrite(byte[] bytes) throws IOException {
         enqueueWrite(ByteBuffer.wrap(bytes));
     }
 
+    /**
+     * Enqueues a ByteBuffer for writing.
+     * This method adds the ByteBuffer to the writing queue if it is not empty.
+     *
+     * @param buffer the ByteBuffer to enqueue for writing.
+     * @throws IOException if an I/O error occurs while enqueuing the write operation.
+     */
     private void enqueueWrite(ByteBuffer buffer) throws IOException {
         if (buffer == null || buffer.remaining() == 0) {
             logger.warn("from client" + channel.getRemoteAddress() + ": Attempted to enqueue an empty buffer for writing.");
@@ -156,8 +170,30 @@ public class Connection {
         writeQueue.offer(buffer);
     }
 
+    /**
+     * Disables the write operation for this connection.
+     * This method sets the interest ops of the key to remove OP_WRITE
+     * and wakes up the selector to process the change.
+     */
     private void disableWrite() {
         key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
         key.selector().wakeup();
+    }
+
+    /**
+     * Sends a QUIT command to the Redis server.
+     * This method encodes the QUIT command as a simple string and enqueues it for writing.
+     * After sending the command, it enables the write operation and sets closeAfterWrite to true,
+     * indicating that the connection should be closed after the write operation is complete.
+     */
+    public void quit() {
+        byte[] quit = encoder.encodeSimpleString("QUIT");
+        try {
+            enqueueWrite(quit);
+        } catch (IOException e) {
+            logger.error("Failed to send QUIT command", e);
+        }
+        enableWrite();
+        closeAfterWrite = true;
     }
 }
