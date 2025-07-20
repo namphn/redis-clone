@@ -149,11 +149,7 @@ public class ByteQueue {
      * If a mark is already set, it throws an IllegalStateException.
      */
     public void mark() {
-        if (mark < 0) {
-            mark = read;
-        } else {
-            throw new IllegalStateException("Mark already set");
-        }
+        mark = read;
     }
 
     /**

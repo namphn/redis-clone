@@ -21,6 +21,9 @@ public class Resp2ParserCase implements ArgumentsProvider {
         ByteQueue queue3 = new ByteQueue(0);
         queue3.append(ByteBuffer.wrap("*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n$5\r\nvalue\r\n".getBytes()));
 
+        ByteQueue queue4 = new ByteQueue(0);
+        queue4.append(ByteBuffer.wrap("*1\r\n$4\r\nPING\r\n".getBytes()));
+
         return Stream.of(
             // case: valid command with arguments
             Arguments.of(
@@ -39,6 +42,12 @@ public class Resp2ParserCase implements ArgumentsProvider {
                     queue3,
                     List.of("SET".getBytes(), "key".getBytes(), "value".getBytes()),
                 null
+            ),
+
+            Arguments.of(
+                    queue4,
+                    List.of("PING".getBytes()),
+                    null
             )
         );
     }

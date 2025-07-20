@@ -1,6 +1,9 @@
 package dev.namph.redis;
 
+import dev.namph.redis.cmd.impl.CommandRegistry;
 import dev.namph.redis.net.Connection;
+import dev.namph.redis.store.IStore;
+import dev.namph.redis.store.impl.KeyValueStore;
 import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -15,9 +18,11 @@ public class RedisServer {
     private ServerSocketChannel channel;
     private Selector selector;
 
-    private Integer port;
+    private final Integer port;
     private static final int DEFAULT_PORT = 6380;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(RedisServer.class);
+    private final IStore store = new KeyValueStore();
+    private final CommandRegistry commandRegistry = new CommandRegistry(store);
 
     /**
      * Constructor for RedisServer.
@@ -109,7 +114,7 @@ public class RedisServer {
 
         clientChannel.configureBlocking(false);
         SelectionKey selectionKey = clientChannel.register(selector, SelectionKey.OP_READ);
-        Connection connection = new Connection(selectionKey, clientChannel);
+        Connection connection = new Connection(selectionKey, clientChannel, commandRegistry);
         selectionKey.attach(connection);
         logger.info("Registered new connection with selector");
     }

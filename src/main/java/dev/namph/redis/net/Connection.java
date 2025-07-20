@@ -1,5 +1,6 @@
 package dev.namph.redis.net;
 
+import dev.namph.redis.cmd.impl.CommandRegistry;
 import dev.namph.redis.resp.*;
 import org.slf4j.Logger;
 import java.io.IOException;
@@ -23,18 +24,22 @@ public class Connection {
     private ProtocolParser parser;
     private Deque<ByteBuffer> writeQueue; // Queue for write operations
     private ProtocolEncoder encoder;
+    private CommandRegistry commandRegistry;
+    private boolean closeAfterWrite = false;
 
     /**
      * Constructor for Connection.
      * @param key the SelectionKey associated with this connection.
      * @param channel the SocketChannel associated with this connection.
+     * @param commandRegistry the CommandRegistry to handle commands for this connection.
      */
-    public Connection(SelectionKey key, SocketChannel channel) {
+    public Connection(SelectionKey key, SocketChannel channel, CommandRegistry commandRegistry) {
         this.key = key;
         this.channel = channel;
         parser = new Resp2Parser();
         writeQueue = new ArrayDeque<>();
         encoder = new Resp2Encoder();
+        this.commandRegistry = commandRegistry;
     }
 
     /**
@@ -71,18 +76,15 @@ public class Connection {
                     var errorResponse = encoder.encodeError(parseResult.message());
                     enqueueWrite(errorResponse);
                     enableWrite(); // Enable write operation to send the error response
+                    closeAfterWrite = true; // Close after writing the error response
                     return;
                 }
                 case COMMAND -> {
                     // Process the command
                     logger.info("Received command: " + parseResult.args());
-
+                    byte[] res = commandRegistry.dispatch(this, parseResult.args());
+                    enqueueWrite(res);
                     enableWrite(); // Enable write operation to send the response
-                }
-                default -> {
-                    // Incomplete command, wait for more data
-                    logger.info("Incomplete command, waiting for more data");
-                    break;
                 }
             }
         }
@@ -98,6 +100,9 @@ public class Connection {
         if (writeQueue.isEmpty()) {
             logger.info("No data to write for " + channel.getRemoteAddress());
             disableWrite(); // Disable write operation if there's nothing to write
+            if (closeAfterWrite) {
+                closeConnection(); // Close the connection if we are done writing
+            }
             return;
         }
 

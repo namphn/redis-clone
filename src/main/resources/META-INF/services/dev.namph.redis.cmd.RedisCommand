@@ -1,0 +1,2 @@
+dev.namph.redis.cmd.impl.PingCommand
+dev.namph.redis.cmd.impl.EchoCommand
