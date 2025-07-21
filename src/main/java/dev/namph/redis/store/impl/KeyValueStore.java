@@ -16,4 +16,9 @@ public class KeyValueStore implements IStore {
     public byte[] get(byte[] key) {
         return kv.get(new Key(key));
     }
+
+    @Override
+    public int size() {
+        return kv.size();
+    }
 }

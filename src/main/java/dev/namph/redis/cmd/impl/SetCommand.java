@@ -11,6 +11,11 @@ import dev.namph.redis.util.Singleton;
 
 import java.util.List;
 
+/**
+ * The SET command is used to set the value of a key in the Redis store.
+ * It takes at least three arguments: the command name, the key, and the value.
+ * If successful, it returns "OK".
+ */
 @Cmd(name = "SET", minArgs = 3)
 public class SetCommand implements RedisCommand, NeedsStore {
     private IStore store;

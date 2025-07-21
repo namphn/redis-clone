@@ -2,3 +2,4 @@ dev.namph.redis.cmd.impl.PingCommand
 dev.namph.redis.cmd.impl.EchoCommand
 dev.namph.redis.cmd.impl.QuitCommand
 dev.namph.redis.cmd.impl.SetCommand
+dev.namph.redis.cmd.impl.GetCommand

@@ -28,6 +28,14 @@ public interface ProtocolEncoder {
     byte[] encodeBulkString(String bulkString);
 
     /**
+     * Encodes a bulk string represented as a byte array into the RESP protocol format.
+     *
+     * @param bulkString The bulk string to encode as a byte array.
+     * @return The encoded bulk string as a byte array.
+     */
+    byte[] encodeBulkString(byte[] bulkString);
+
+    /**
      * Encodes a simple string into the RESP protocol format.
      *
      * @param simpleString The simple string to encode.
@@ -42,4 +50,11 @@ public interface ProtocolEncoder {
      * @return The encoded array as a byte array.
      */
     byte[] encodeArray(List list);
+
+    /**
+     * Encodes a nil response in the RESP protocol format.
+     *
+     * @return The encoded nil response as a byte array.
+     */
+    byte[] encodeNil();
 }

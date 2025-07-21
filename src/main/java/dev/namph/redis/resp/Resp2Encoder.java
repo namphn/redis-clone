@@ -1,9 +1,15 @@
 package dev.namph.redis.resp;
 
 import dev.namph.redis.util.Resp2Syntax;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class Resp2Encoder implements ProtocolEncoder{
+    private final Logger logger = LoggerFactory.getLogger(Resp2Encoder.class);
+
     @Override
     public byte[] encodeError(String errorMessage) {
         if (errorMessage == null || errorMessage.isEmpty()) {
@@ -29,7 +35,7 @@ public class Resp2Encoder implements ProtocolEncoder{
         if (bulkString == null) {
             throw new IllegalArgumentException("Bulk string cannot be null");
         }
-        byte[] bulkBytes = (bulkString.length() + bulkString).getBytes();
+        byte[] bulkBytes = (bulkString.length() + "\r\n" + bulkString).getBytes();
         return joinByte(Resp2Syntax.BULK_STRING_PREFIX, bulkBytes);
     }
 
@@ -46,6 +52,19 @@ public class Resp2Encoder implements ProtocolEncoder{
     @Override
     public byte[] encodeArray(List list) {
         return new byte[0];
+    }
+
+    @Override
+    public byte[] encodeNil() {
+        // RESP protocol requires nil to be represented as a bulk string with length -1
+        return "$-1\r\n".getBytes();
+    }
+
+    @Override
+    public byte[] encodeBulkString(byte[] bulkString) {
+        String str = new String(bulkString, StandardCharsets.US_ASCII);
+        logger.info("bulk string: {}", str);
+        return encodeBulkString(str);
     }
 
     private static byte[] joinByte(byte prefix, byte[] buffer) {
