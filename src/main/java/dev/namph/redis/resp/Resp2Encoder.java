@@ -62,9 +62,15 @@ public class Resp2Encoder implements ProtocolEncoder{
 
     @Override
     public byte[] encodeBulkString(byte[] bulkString) {
-        String str = new String(bulkString, StandardCharsets.US_ASCII);
-        logger.info("bulk string: {}", str);
-        return encodeBulkString(str);
+        if (bulkString == null || bulkString.length == 0) {
+            throw new IllegalArgumentException("Bulk string cannot be null or empty");
+        }
+        byte[] lengthBytes = (bulkString.length + "\r\n").getBytes();
+        byte[] str = new byte[lengthBytes.length + bulkString.length];
+        System.arraycopy(lengthBytes, 0, str, 0, lengthBytes.length);
+        System.arraycopy(bulkString, 0, str, lengthBytes.length, bulkString.length);
+        // RESP protocol requires the bulk string to be prefixed with '$'
+        return joinByte(Resp2Syntax.BULK_STRING_PREFIX, str);
     }
 
     private static byte[] joinByte(byte prefix, byte[] buffer) {

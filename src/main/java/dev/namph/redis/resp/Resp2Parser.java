@@ -34,7 +34,7 @@ public class Resp2Parser implements ProtocolParser{
             return ParseResult.IM_COMPLETE;
         }
 
-        String lengthStr = new String(lengthBytes, StandardCharsets.US_ASCII);
+        String lengthStr = new String(lengthBytes, StandardCharsets.UTF_8);
         int argvCount = Integer.parseInt(lengthStr);
         if (argvCount <= 0) {
             String errorMessage = "Protocol error: negative length in Array('*'): " + argvCount;
@@ -63,7 +63,7 @@ public class Resp2Parser implements ProtocolParser{
                 return ParseResult.IM_COMPLETE;
             }
 
-            String argLengthStr = new String(argLengthBytes, StandardCharsets.US_ASCII);
+            String argLengthStr = new String(argLengthBytes, StandardCharsets.UTF_8);
             int argLength;
             try {
                 argLength = Integer.parseInt(argLengthStr);

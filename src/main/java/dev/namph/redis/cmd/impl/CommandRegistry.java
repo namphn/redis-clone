@@ -45,7 +45,7 @@ public class CommandRegistry {
         if (argv == null || argv.isEmpty()) {
             return encoder.encodeError("ERR invalid command");
         }
-        String commandName = new String(argv.get(0), StandardCharsets.US_ASCII).toUpperCase(Locale.ROOT);
+        String commandName = new String(argv.get(0), StandardCharsets.UTF_8).toUpperCase(Locale.ROOT);
         var command = commands.get(commandName);
 
         String errorMessage;
