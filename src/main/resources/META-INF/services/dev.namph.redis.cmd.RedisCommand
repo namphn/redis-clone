@@ -6,3 +6,4 @@ dev.namph.redis.cmd.impl.GetCommand
 dev.namph.redis.cmd.impl.MsetCommand
 dev.namph.redis.cmd.impl.MgetCommand
 dev.namph.redis.cmd.impl.IncrCommand
+dev.namph.redis.cmd.impl.DecrCommand
