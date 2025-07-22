@@ -2,8 +2,10 @@ package dev.namph.redis;
 
 import dev.namph.redis.cmd.impl.CommandRegistry;
 import dev.namph.redis.net.Connection;
+import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
 import dev.namph.redis.store.impl.KeyValueStore;
+import dev.namph.redis.util.Singleton;
 import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -22,7 +24,8 @@ public class RedisServer {
     private static final int DEFAULT_PORT = 6380;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(RedisServer.class);
     private final IStore store = new KeyValueStore();
-    private final CommandRegistry commandRegistry = new CommandRegistry(store);
+    private final ProtocolEncoder encoder = Singleton.getResp2Encoder();
+    private final CommandRegistry commandRegistry = new CommandRegistry(store, encoder);
 
     /**
      * Constructor for RedisServer.

@@ -13,11 +13,16 @@ import java.util.List;
 @Cmd(name = "MGET", minArgs = 2)
 public class MgetCommand implements RedisCommand, NeedsStore {
     private IStore store;
-    private final ProtocolEncoder encoder = Singleton.getResp2Encoder();
+    private ProtocolEncoder encoder;
 
     @Override
     public void setStore(IStore store) {
         this.store = store;
+    }
+
+    @Override
+    public void setEncoder(ProtocolEncoder encoder) {
+        this.encoder = encoder;
     }
 
     @Override

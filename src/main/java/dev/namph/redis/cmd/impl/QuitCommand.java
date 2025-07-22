@@ -3,6 +3,7 @@ package dev.namph.redis.cmd.impl;
 import dev.namph.redis.cmd.Cmd;
 import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
+import dev.namph.redis.resp.ProtocolEncoder;
 
 import java.util.List;
 
@@ -12,6 +13,13 @@ import java.util.List;
  */
 @Cmd(name = "QUIT", minArgs = 1)
 public class QuitCommand implements RedisCommand {
+    private ProtocolEncoder encoder;
+
+    @Override
+    public void setEncoder(ProtocolEncoder encoder) {
+        this.encoder = encoder;
+    }
+
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
         // Close the connection and return an empty byte array

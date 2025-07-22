@@ -5,9 +5,7 @@ import dev.namph.redis.cmd.NeedsStore;
 import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
-import dev.namph.redis.resp.Resp2Encoder;
 import dev.namph.redis.store.IStore;
-import dev.namph.redis.util.Singleton;
 
 import java.util.List;
 
@@ -19,7 +17,12 @@ import java.util.List;
 @Cmd(name = "SET", minArgs = 3)
 public class SetCommand implements RedisCommand, NeedsStore {
     private IStore store;
-    private final ProtocolEncoder encoder = Singleton.getResp2Encoder();
+    private ProtocolEncoder encoder;
+
+    @Override
+    public void setEncoder(ProtocolEncoder encoder) {
+        this.encoder = encoder;
+    }
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {

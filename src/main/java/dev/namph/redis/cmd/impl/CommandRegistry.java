@@ -20,7 +20,7 @@ public class CommandRegistry {
     private final ProtocolEncoder encoder = Singleton.getResp2Encoder();
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public CommandRegistry(IStore store) {
+    public CommandRegistry(IStore store, ProtocolEncoder encoder) {
         this.store = store;
 
         ServiceLoader<RedisCommand> loader = ServiceLoader.load(RedisCommand.class);
@@ -35,6 +35,7 @@ public class CommandRegistry {
                 throw new IllegalStateException("Duplicate command name: " + name);
             }
             if (command instanceof NeedsStore ns) ns.setStore(store);
+            command.setEncoder(encoder);
 
             commands.put(name, command);
             commandMetadata.put(name, cmdAnnotation);

@@ -17,6 +17,12 @@ import java.util.List;
 @Cmd(name = "PING", minArgs = 1)
 public class PingCommand implements RedisCommand {
     private ProtocolEncoder encoder = Singleton.getResp2Encoder();
+
+    @Override
+    public void setEncoder(ProtocolEncoder encoder) {
+        this.encoder = encoder;
+    }
+
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
         if (argv.size() > 1) return encoder.encodeSimpleString(new String(argv.get(1)));

@@ -13,7 +13,13 @@ import java.util.List;
  */
 @Cmd(name = "ECHO", minArgs = 2)
 public class EchoCommand implements RedisCommand {
-    private ProtocolEncoder encoder = Singleton.getResp2Encoder();
+    private ProtocolEncoder encoder;
+
+    @Override
+    public void setEncoder(ProtocolEncoder encoder) {
+        this.encoder = encoder;
+    }
+
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
         if (argv.size() < 2) {
