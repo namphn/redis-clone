@@ -36,8 +36,10 @@ public class GetCommand implements RedisCommand, NeedsStore {
         byte[] value = store.get(key);
         if (value == null) {
             // If the key does not exist, return a nil response
+            logger.info("key not found: {}", new String(key));
             return encoder.encodeNil();
         }
+        logger.info("found {}", new String(value));
         // If the key exists, return the value as a bulk string
         return encoder.encodeBulkString(value);
     }

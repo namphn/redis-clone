@@ -30,6 +30,12 @@ public class SetCommand implements RedisCommand, NeedsStore {
         byte[] key = argv.get(1);
         byte[] value = argv.get(2);
 
+        if (argv.size() > 3) {
+            // todo handle additional options like EX, PX, NX, XX
+            if (!validateOptions(argv.subList(3, argv.size()))) {
+                return encoder.encodeError("ERR invalid options for 'set' command");
+            }
+        }
         // Store the key-value pair in the store
         store.set(key, value);
 
@@ -40,5 +46,11 @@ public class SetCommand implements RedisCommand, NeedsStore {
     @Override
     public void setStore(IStore store) {
         this.store = store;
+    }
+
+    private boolean validateOptions(List<byte[]> argv) {
+        // Validate options like EX, PX, NX, XX if provided
+        // This is a placeholder for future implementation
+        return false;
     }
 }

@@ -49,7 +49,7 @@ public interface ProtocolEncoder {
      * @param list The list to encode,
      * @return The encoded array as a byte array.
      */
-    byte[] encodeArray(List list);
+    byte[] encodeArray(List<byte[]> list);
 
     /**
      * Encodes a nil response in the RESP protocol format.

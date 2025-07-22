@@ -3,3 +3,5 @@ dev.namph.redis.cmd.impl.EchoCommand
 dev.namph.redis.cmd.impl.QuitCommand
 dev.namph.redis.cmd.impl.SetCommand
 dev.namph.redis.cmd.impl.GetCommand
+dev.namph.redis.cmd.impl.MsetCommand
+dev.namph.redis.cmd.impl.MgetCommand
