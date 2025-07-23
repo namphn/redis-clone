@@ -6,6 +6,8 @@ import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
+import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.RedisString;
 import dev.namph.redis.util.Singleton;
 
 import java.util.List;
@@ -32,8 +34,8 @@ public class MsetCommand implements RedisCommand, NeedsStore {
         }
 
         for (int i = 1; i < argv.size(); i += 2) {
-            byte[] key = argv.get(i);
-            byte[] value = argv.get(i + 1);
+            var key = new Key(argv.get(i));
+            var value = new RedisString(argv.get(i + 1));
             store.set(key, value);
         }
 

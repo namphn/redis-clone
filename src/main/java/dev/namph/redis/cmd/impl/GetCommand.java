@@ -6,7 +6,8 @@ import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
-import dev.namph.redis.util.Singleton;
+import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.RedisString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,17 +36,24 @@ public class GetCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        byte[] key = argv.get(1);
+        Key key = new Key(argv.get(1));
         // Retrieve the value from the store
-        logger.info("GET key: {}", new String(key));
-        byte[] value = store.get(key);
-        if (value == null) {
+        logger.info("GET key: {}", new String(argv.get(1)));
+        var redisValue = store.get(key);
+
+        if (redisValue == null) {
             // If the key does not exist, return a nil response
-            logger.info("key not found: {}", new String(key));
+            logger.info("key not found: {}", new String(argv.get(1)));
             return encoder.encodeNil();
         }
-        logger.info("found {}", new String(value));
+
+        if (!(redisValue instanceof RedisString)) {
+            logger.error("WRONG TYPE Operation against a key holding the wrong kind of value");
+            return encoder.encodeError("WRONG TYPE Operation against a key holding the wrong kind of value");
+        }
+
+        logger.info("found {}", ((RedisString) redisValue).getStringValue());
         // If the key exists, return the value as a bulk string
-        return encoder.encodeBulkString(value);
+        return encoder.encodeBulkString(((RedisString) redisValue).getValue());
     }
 }

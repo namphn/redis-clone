@@ -1,7 +1,9 @@
 package dev.namph.redis.store;
 
+import dev.namph.redis.store.impl.Key;
+
 public interface IStore {
-    void set(byte[] key, byte[] value);
-    byte[] get(byte[] key);
+    void set(Key key, RedisValue value);
+    RedisValue get(Key key);
     int size();
 }

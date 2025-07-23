@@ -7,6 +7,8 @@ import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
+import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.RedisString;
 import dev.namph.redis.util.Singleton;
 
 import java.util.List;
@@ -32,16 +34,21 @@ public class IncrCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("ERR wrong number of arguments for 'incr' command");
         }
 
-        byte[] key = argv.get(1);
-        byte[] valueBytes = store.get(key);
+        var key = new Key(argv.get(1));
+        var redisValue = store.get(key);
         long value;
 
-        if (valueBytes == null) {
+        // Check if the value is a valid RedisString
+        if (redisValue != null && !(redisValue instanceof RedisString)) {
+            return encoder.encodeError("ERR WRONG TYPE Operation against a key holding the wrong kind of value");
+        }
+
+        if (redisValue == null) {
             // If the key does not exist, initialize it to 0
             value = 0;
         } else {
             try {
-                value = Long.parseLong(new String(valueBytes));
+                value = Long.parseLong(new String(((RedisString) redisValue).getValue()));
             } catch (NumberFormatException e) {
                 return encoder.encodeError("ERR value is not an integer or out of range");
             }
@@ -49,7 +56,7 @@ public class IncrCommand implements RedisCommand, NeedsStore {
 
         // Increment the value
         value++;
-        store.set(key, String.valueOf(value).getBytes());
+        store.set(key, new RedisString(value));
 
         // Return the incremented value as a simple string
         return encoder.encodeInteger(value);

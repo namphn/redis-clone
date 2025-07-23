@@ -6,7 +6,9 @@ import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
-import dev.namph.redis.util.Singleton;
+import dev.namph.redis.store.RedisValue;
+import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.RedisString;
 
 import java.util.List;
 
@@ -31,16 +33,20 @@ public class DecrCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("ERR wrong number of arguments for 'decr' command");
         }
 
-        byte[] key = argv.get(1);
-        byte[] valueBytes = store.get(key);
+        Key key = new Key(argv.get(1));
+        RedisValue redisValue = store.get(key);
+
+        if (redisValue != null && !(redisValue instanceof RedisString)) {
+            return encoder.encodeError("ERR WRONG TYPE Operation against a key holding the wrong kind of value");
+        }
         long value;
 
-        if (valueBytes == null) {
+        if (redisValue == null) {
             // If the key does not exist, initialize it to 0
             value = 0;
         } else {
             try {
-                value = Long.parseLong(new String(valueBytes));
+                value = Long.parseLong(new String(((RedisString) redisValue).getValue()));
             } catch (NumberFormatException e) {
                 return encoder.encodeError("ERR value is not an integer or out of range");
             }
@@ -48,7 +54,7 @@ public class DecrCommand implements RedisCommand, NeedsStore {
 
         // Decrement the value
         value--;
-        store.set(key, String.valueOf(value).getBytes());
+        store.set(key, new RedisString(value));
 
         // Return the decremented value as a simple string
         return encoder.encodeInteger(value);

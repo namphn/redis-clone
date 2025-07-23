@@ -6,6 +6,8 @@ import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
+import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.RedisString;
 
 import java.util.List;
 
@@ -30,8 +32,8 @@ public class SetCommand implements RedisCommand, NeedsStore {
             return "ERR wrong number of arguments for 'set' command".getBytes();
         }
 
-        byte[] key = argv.get(1);
-        byte[] value = argv.get(2);
+        var key = new Key(argv.get(1));
+        var value = new RedisString(argv.get(2));
 
         if (argv.size() > 3) {
             // todo handle additional options like EX, PX, NX, XX

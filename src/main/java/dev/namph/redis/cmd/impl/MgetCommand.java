@@ -6,7 +6,8 @@ import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
-import dev.namph.redis.util.Singleton;
+import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.RedisString;
 
 import java.util.List;
 
@@ -36,14 +37,18 @@ public class MgetCommand implements RedisCommand, NeedsStore {
 
         // Iterate over the keys provided in the arguments
         for (int i = 1; i < argv.size(); i++) {
-            byte[] key = argv.get(i);
-            byte[] value = store.get(key);
-            if (value == null) {
+            Key key = new Key(argv.get(i));
+            var redisValue = store.get(key);
+            if (redisValue == null) {
                 // If the key does not exist, add a nil response
                 values.add(null);
             } else {
+                if (!(redisValue instanceof RedisString)) {
+                    // If the value is not a string, return an error
+                    return encoder.encodeError("WRONG TYPE Operation against a key holding the wrong kind of value");
+                }
                 // If the key exists, add the value to the list
-                values.add(value);
+                values.add(((RedisString) redisValue).getValue());
             }
         }
         // Return the list of values as a multi-bulk response
