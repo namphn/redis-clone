@@ -2,7 +2,9 @@ package dev.namph.redis.store.impl;
 
 import dev.namph.redis.store.RedisValue;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class QuickList implements RedisValue {
     // use ArrayDeque as chunk
@@ -76,28 +78,59 @@ public class QuickList implements RedisValue {
     }
 
     public byte[] removeFirst() {
+        while (!list.isEmpty() && list.getFirst().isEmpty()) {
+            list.removeFirst(); // remove empty chunk
+        }
+
         if (list.isEmpty()) {
             return null; // or throw an exception
         }
-        ArrayDeque<byte[]> firstChunk = list.getFirst();
-        if (firstChunk.isEmpty()) {
-            list.removeFirst(); // remove empty chunk
-            return null; // or throw an exception
-        }
+
+        var firstChunk = list.getFirst();
+
         byte[] value = firstChunk.removeFirst();
         if (firstChunk.isEmpty()) {
             list.removeFirst(); // remove empty chunk
         }
         total--;
-        if (list.getFirst().size() < minChunkSize) {
+        if (!list.isEmpty() && list.getFirst().size() < minChunkSize) {
             mergeFirst();
         }
         return value;
     }
 
+    public List<byte[]> removeFirst(long count) {
+        if (list.isEmpty()) {
+            return null;
+        }
+
+        List<byte[]> values = new ArrayList<>();
+
+        while (count > 0 && !list.isEmpty()) {
+            if (list.getFirst().isEmpty()) {
+                list.removeFirst(); // remove empty chunk
+            }
+            if (list.isEmpty()) {
+                break; // no more chunks to process
+            }
+            values.add(list.getFirst().removeFirst());
+            count--;
+            total--;
+        }
+
+        if (!list.isEmpty() && list.getFirst().size() < minChunkSize) {
+            mergeFirst();
+        }
+
+        return values;
+    }
+
     private void mergeFirst() {
         if (list.size() < 2) {
             return; // nothing to merge
+        }
+        if (list.getFirst().size() + list.get(1).size() >= maxChunkSize) {
+            return;
         }
         ArrayDeque<byte[]> firstChunk = list.getFirst();
         ArrayDeque<byte[]> secondChunk = list.get(1);
@@ -139,6 +172,10 @@ public class QuickList implements RedisValue {
         if (secondLastChunk.size() < minChunkSize) {
             mergeLast(); // recursively merge if still below min size
         }
+    }
+
+    public boolean isEmpty() {
+        return total == 0;
     }
 
     @Override

@@ -36,6 +36,8 @@ public class LpushCommand implements RedisCommand, NeedsStore {
         var redisValues = store.get(key);
         if (redisValues == null) {
             redisValues = new QuickList();
+            QuickList list = (QuickList) redisValues;
+            list.setMaxChunkSize(2);
         }
 
         QuickList list = (QuickList) redisValues;
