@@ -8,12 +8,11 @@ import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
 import dev.namph.redis.store.impl.Key;
 import dev.namph.redis.store.impl.RedisString;
-import dev.namph.redis.util.Singleton;
 
 import java.util.List;
 
 @Cmd(name = "MSET", minArgs = 3)
-public class MsetCommand implements RedisCommand, NeedsStore {
+public class MSetCommand implements RedisCommand, NeedsStore {
     private IStore store;
     private ProtocolEncoder encoder;
 

@@ -12,7 +12,7 @@ import dev.namph.redis.store.impl.RedisString;
 import java.util.List;
 
 @Cmd(name = "MGET", minArgs = 2)
-public class MgetCommand implements RedisCommand, NeedsStore {
+public class MGetCommand implements RedisCommand, NeedsStore {
     private IStore store;
     private ProtocolEncoder encoder;
 

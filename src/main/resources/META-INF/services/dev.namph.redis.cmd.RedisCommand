@@ -3,9 +3,9 @@ dev.namph.redis.cmd.impl.EchoCommand
 dev.namph.redis.cmd.impl.QuitCommand
 dev.namph.redis.cmd.impl.SetCommand
 dev.namph.redis.cmd.impl.GetCommand
-dev.namph.redis.cmd.impl.MsetCommand
-dev.namph.redis.cmd.impl.MgetCommand
+dev.namph.redis.cmd.impl.MSetCommand
+dev.namph.redis.cmd.impl.MGetCommand
 dev.namph.redis.cmd.impl.IncrCommand
 dev.namph.redis.cmd.impl.DecrCommand
-dev.namph.redis.cmd.impl.LpushCommand
-dev.namph.redis.cmd.impl.LpopCommand
+dev.namph.redis.cmd.impl.LPushCommand
+dev.namph.redis.cmd.impl.LPopCommand

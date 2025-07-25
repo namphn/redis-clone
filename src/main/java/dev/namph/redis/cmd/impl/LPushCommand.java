@@ -12,7 +12,7 @@ import dev.namph.redis.store.impl.QuickList;
 import java.util.List;
 
 @Cmd(name = "LPUSH", minArgs = 3)
-public class LpushCommand implements RedisCommand, NeedsStore {
+public class LPushCommand implements RedisCommand, NeedsStore {
     private IStore store;
     private ProtocolEncoder encoder;
 

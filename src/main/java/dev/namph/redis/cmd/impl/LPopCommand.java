@@ -12,7 +12,7 @@ import dev.namph.redis.store.impl.QuickList;
 import java.util.List;
 
 @Cmd( name = "LPOP", minArgs = 2)
-public class LpopCommand implements RedisCommand, NeedsStore {
+public class LPopCommand implements RedisCommand, NeedsStore {
     private IStore store;
     private ProtocolEncoder encoder;
 
