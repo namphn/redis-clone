@@ -66,6 +66,33 @@ public class QuickList implements RedisValue {
         return firstChunk.getFirst();
     }
 
+    public byte[] get(long index) {
+        if (index < 0 || index >= total) {
+            return null; // or throw an exception
+        }
+
+        long currentIndex = 0;
+        for (ArrayDeque<byte[]> chunk : list) {
+            if (currentIndex + chunk.size() > index) {
+                return getElementInnerChunk(chunk, index - currentIndex);
+            }
+            currentIndex += chunk.size();
+        }
+        return null;
+    }
+
+    private byte[] getElementInnerChunk(ArrayDeque<byte[]> chunk, long index) {
+        if (index < 0 || index >= chunk.size()) {
+            return null; // or throw an exception
+        }
+        for (byte[] element : chunk) {
+            if (index-- == 0) {
+                return element;
+            }
+        }
+        return null;
+    }
+
     public byte[] getLast() {
         if (list.isEmpty()) {
             return null; // or throw an exception
@@ -176,6 +203,10 @@ public class QuickList implements RedisValue {
 
     public boolean isEmpty() {
         return total == 0;
+    }
+
+    public long size() {
+        return total;
     }
 
     @Override

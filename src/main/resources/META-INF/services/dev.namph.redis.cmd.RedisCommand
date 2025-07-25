@@ -9,3 +9,4 @@ dev.namph.redis.cmd.impl.IncrCommand
 dev.namph.redis.cmd.impl.DecrCommand
 dev.namph.redis.cmd.impl.LPushCommand
 dev.namph.redis.cmd.impl.LPopCommand
+dev.namph.redis.cmd.impl.LIndexCommand
