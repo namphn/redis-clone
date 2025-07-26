@@ -29,9 +29,6 @@ public class SAddCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        if (argv.size() < 3) {
-            return encoder.encodeError("ERR wrong number of arguments for 'SADD' command");
-        }
         var key = new Key(argv.get(1));
         var value = store.get(key);
 

@@ -28,10 +28,6 @@ public class LPushCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        if (argv.size() < 3) {
-            return encoder.encodeError("ERR wrong number of arguments for 'lpush' command");
-        }
-
         var key = new Key(argv.get(1));
         var redisValues = store.get(key);
         if (redisValues == null) {

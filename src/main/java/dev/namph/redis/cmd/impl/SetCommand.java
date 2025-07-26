@@ -28,10 +28,6 @@ public class SetCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        if (argv.size() < 3) {
-            return "ERR wrong number of arguments for 'set' command".getBytes();
-        }
-
         var key = new Key(argv.get(1));
         var value = new RedisString(argv.get(2));
 

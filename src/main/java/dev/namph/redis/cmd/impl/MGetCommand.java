@@ -28,10 +28,6 @@ public class MGetCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        if (argv.size() < 2) {
-            return encoder.encodeError("ERR wrong number of arguments for 'mget' command");
-        }
-
         // Prepare a list to hold the values
         List<byte[]> values = new java.util.ArrayList<>();
 

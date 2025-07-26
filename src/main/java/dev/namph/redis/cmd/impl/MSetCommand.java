@@ -28,7 +28,7 @@ public class MSetCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        if (argv.size() < 3 || argv.size() % 2 != 1) {
+        if (argv.size() % 2 != 1) {
             return encoder.encodeError("ERR wrong number of arguments for 'mset' command");
         }
 
