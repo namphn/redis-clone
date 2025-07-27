@@ -1,9 +1,12 @@
 package dev.namph.redis.store.impl;
 
 import dev.namph.redis.store.RedisValue;
-import java.util.Arrays;
 
-public class OASet implements RedisValue {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class OASet<T> implements RedisValue {
     // slot marker
     private final Object EMPTY = new Object();
     private final Object TOMB = new Object();
@@ -12,7 +15,7 @@ public class OASet implements RedisValue {
     private int used;
     private final double maxLoad;
     private long modCount; // for concurrency control
-    private  Object[] table;
+    private  Object [] table;
 
     private static final double DEFAULT_MAX_LOAD = 0.70;
     private static final int DEFAULT_INITIAL_CAPACITY = 16;
@@ -36,6 +39,7 @@ public class OASet implements RedisValue {
         while (cap <= Math.max(MIN_CAPACITY, capacity)) {
             cap <<= 1; // Ensure capacity is a power of two
         }
+
         this.table = new Object[cap];
         Arrays.fill(this.table, EMPTY); // Initialize all slots to EMPTY
         this.maxLoad = Math.min(Math.max(maxLoad, 0.50), 0.90); // Ensure maxLoad is between 0.50 and 0.90
@@ -44,7 +48,7 @@ public class OASet implements RedisValue {
         this.modCount = 0;
     }
 
-    public long size() {
+    public int size() {
         return size;
     }
 
@@ -56,7 +60,7 @@ public class OASet implements RedisValue {
         return findIndex(o) != -1;
     }
 
-    public boolean add(Object o) {
+    public boolean add(T o) {
         if (o == null) {
             return false; // Null values are not allowed
         }
@@ -83,6 +87,16 @@ public class OASet implements RedisValue {
         used++;
         modCount++;
         return true;
+    }
+
+    public List<T> getAll() {
+        List<T> result = new ArrayList<>(size);
+        for (Object item : table) {
+            if (item != EMPTY && item != TOMB) {
+                result.add((T) item); // Collect only valid items
+            }
+        }
+        return result;
     }
 
     public boolean remove(Object o) {

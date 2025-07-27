@@ -12,3 +12,4 @@ dev.namph.redis.cmd.impl.LPopCommand
 dev.namph.redis.cmd.impl.LIndexCommand
 dev.namph.redis.cmd.impl.LLenCommand
 dev.namph.redis.cmd.impl.SAddCommand
+dev.namph.redis.cmd.impl.SMembers
