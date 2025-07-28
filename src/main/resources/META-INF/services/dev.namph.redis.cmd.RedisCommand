@@ -14,3 +14,4 @@ dev.namph.redis.cmd.impl.LLenCommand
 dev.namph.redis.cmd.impl.SAddCommand
 dev.namph.redis.cmd.impl.SMembers
 dev.namph.redis.cmd.impl.SRandMember
+dev.namph.redis.cmd.impl.HSetCommand

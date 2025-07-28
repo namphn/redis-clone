@@ -8,6 +8,7 @@ import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
 import dev.namph.redis.store.impl.Key;
 import dev.namph.redis.store.impl.OASet;
+import dev.namph.redis.store.impl.RedisSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,13 +55,13 @@ public class SRandMember implements RedisCommand, NeedsStore {
             return encoder.encodeArray(List.of());
         }
 
-        if (!(value instanceof OASet set)) {
+        if (!(value instanceof RedisSet set)) {
             return encoder.encodeError("WRONGTYPE Operation against a key holding the wrong kind of value");
         }
 
         if (count <= 1) {
             // Return a single random member
-            Key randomMember = (Key) set.randomOneMember();
+            Key randomMember = (Key) set.random();
             if (randomMember == null) {
                 return encoder.encodeNil();
             }
@@ -68,7 +69,7 @@ public class SRandMember implements RedisCommand, NeedsStore {
         }
 
         // Return multiple random members
-        List<Key> randomMembers = set.randomMembers(count);
+        List<Key> randomMembers = set.random(count);
         if (randomMembers.isEmpty()) {
             return encoder.encodeNil();
         }

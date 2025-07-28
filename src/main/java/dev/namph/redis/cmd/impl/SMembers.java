@@ -8,6 +8,7 @@ import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
 import dev.namph.redis.store.impl.Key;
 import dev.namph.redis.store.impl.OASet;
+import dev.namph.redis.store.impl.RedisSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class SMembers implements RedisCommand, NeedsStore {
             return encoder.encodeNil();
         }
 
-        if (!(value instanceof OASet set)) {
+        if (!(value instanceof RedisSet set)) {
             return encoder.encodeError("WRONG TYPE Operation against a key holding the wrong kind of value");
         }
 

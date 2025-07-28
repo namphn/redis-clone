@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class QuickList implements RedisValue {
+public class QuickList implements RedisValue{
     // use ArrayDeque as chunk
     private final LinkedList<ArrayDeque<byte[]>> list;
     private static final int MAX_CHUNK_SIZE = 512;
