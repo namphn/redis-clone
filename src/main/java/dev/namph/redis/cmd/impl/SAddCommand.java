@@ -15,7 +15,6 @@ import java.util.List;
 public class SAddCommand implements RedisCommand, NeedsStore {
     private IStore store;
     private ProtocolEncoder encoder;
-    private final static int DEFAULT_CAPACITY = 512;
 
     @Override
     public void setStore(IStore store) {
@@ -28,6 +27,7 @@ public class SAddCommand implements RedisCommand, NeedsStore {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public byte[] execute(Connection connection, List<byte[]> argv) {
         var key = new Key(argv.get(1));
         var value = store.get(key);
@@ -36,12 +36,12 @@ public class SAddCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("WRONG TYPE Operation against a key holding the wrong kind of value");
         }
 
-        OASet set;
+        OASet<Key> set;
         if (value == null) {
-            set = new OASet(DEFAULT_CAPACITY);
+            set = new OASet<>();
             store.set(key, set);
         } else {
-            set = (OASet) value;
+            set = (OASet<Key>) value;
         }
 
         int addedCount = 0;

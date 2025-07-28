@@ -2,9 +2,7 @@ package dev.namph.redis.store.impl;
 
 import dev.namph.redis.store.RedisValue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class OASet<T> implements RedisValue {
     // slot marker
@@ -20,6 +18,9 @@ public class OASet<T> implements RedisValue {
     private static final double DEFAULT_MAX_LOAD = 0.70;
     private static final int DEFAULT_INITIAL_CAPACITY = 16;
     private static final int MIN_CAPACITY = 4;
+    private static final int MAX_RANDOM_TRIES = 8;
+    private static final int MAX_WINDOW_SCAN = 8;
+    private static final SplittableRandom random = new SplittableRandom();
 
     @Override
     public Type getType() {
@@ -119,6 +120,83 @@ public class OASet<T> implements RedisValue {
         size = 0;
         used = 0;
         modCount++;
+    }
+
+    public T randomOneMember() {
+        if (isEmpty()) {
+            return null;
+        }
+
+        int index = randomOccupiedIndex();
+        if (index == -1) {
+            return null; // No occupied index found
+        }
+        return (T) table[index];
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<T> randomMembers(int count) {
+        if (isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // random with duplicate members
+        if (count <= 0) {
+            int turn = -count;
+            List<T> result = new ArrayList<>();
+            while (turn-- > 0) {
+                int index = randomOccupiedIndex();
+                if (index == -1) {
+                    return result;
+                }
+                result.add((T) table[index]);
+            }
+            return result;
+        }
+
+        Set<T> result = new HashSet<>();
+        while (result.size() < count) {
+            int index = randomOccupiedIndex();
+            if (index == -1) {
+                break; // No more occupied indices available
+            }
+            result.add((T) table[index]);
+        }
+
+        return new ArrayList<>(result);
+    }
+
+    private int randomOccupiedIndex() {
+        if (isEmpty()) {
+            return -1; // No elements to choose from
+        }
+        int tries = 0;
+        int index;
+        do {
+            index = random.nextInt(0, table.length);
+            if (table[index] != EMPTY && table[index] != TOMB) {
+                return index; // Found a valid occupied index
+            }
+            tries++;
+        } while (tries < MAX_RANDOM_TRIES);
+
+        // fall back to liner with max window scan
+        int start = random.nextInt(0, table.length);
+        for (int i = 0; i < MAX_WINDOW_SCAN; i++) {
+            index = (start + i) & (table.length - 1);
+            if (table[index] != EMPTY && table[index] != TOMB) {
+                return index; // Found a valid occupied index
+            }
+        }
+
+        // full scan if no valid index found
+        for (int i = 0; i < table.length; i++) {
+            if (table[index] != EMPTY && table[index] != TOMB) {
+                return index; // Found a valid occupied index
+            }
+        }
+
+        return -1; // Failed to find a valid index after max tries
     }
 
     private int findIndex(Object o) {
