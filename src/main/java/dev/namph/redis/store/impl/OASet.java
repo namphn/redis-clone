@@ -135,6 +135,18 @@ public class OASet<T> implements RedisValue {
         return (T) table[index];
     }
 
+    @SuppressWarnings( "unchecked")
+    public T getMember(Object o) {
+        if (o == null) {
+            return null; // Null values are not allowed
+        }
+        int index = findIndex(o);
+        if (index == -1) {
+            return null; // Object not found
+        }
+        return (T) table[index]; // Return the found object
+    }
+
     @SuppressWarnings("unchecked")
     public List<T> randomMembers(int count) {
         if (isEmpty()) {

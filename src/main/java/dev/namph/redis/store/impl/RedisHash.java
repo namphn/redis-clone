@@ -45,6 +45,14 @@ public class RedisHash implements RedisValue {
         return set.remove(new Entry(new Key(key), null));
     }
 
+    public byte[] get(byte[] key) {
+        var entry = new Entry(new Key(key), null);
+        if (set.contains(entry)) {
+            return set.getMember(entry).value;
+        }
+        return null;
+    }
+
     @Override
     public Type getType() {
         return null;
