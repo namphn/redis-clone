@@ -45,12 +45,12 @@ public class ZAddCommand implements NeedsStore, RedisCommand {
         for (int i = 2; i < argv.size(); i += 2) {
             double score;
             try {
-                score = Double.parseDouble(new String(argv.get(i + 1)));
+                score = Double.parseDouble(new String(argv.get(i)));
             } catch (NumberFormatException e) {
                 return encoder.encodeError("ERR value is not a valid float");
             }
             ZSet zSetInstance = (ZSet) zSet;
-            var entry = new ZSet.Entry(argv.get(i), score);
+            var entry = new ZSet.Entry(argv.get(i + 1), score);
             // O(1) check if the entry already exists
             if (!zSetInstance.contains(entry)) {
                 countAdd++;
