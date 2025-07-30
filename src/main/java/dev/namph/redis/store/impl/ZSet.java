@@ -14,9 +14,13 @@ public class ZSet implements RedisValue {
         this.sortedSet = new TreeSet<>();
     }
 
-    static final class Entry implements Comparable<Entry> {
+    public static final class Entry implements Comparable<Entry> {
         private final Key key;
         private double score;
+
+        public Entry(byte[] key, double score) {
+            this(new Key(key), score);
+        }
 
         public Entry(Key key, double score) {
             this.key = key;
@@ -48,7 +52,10 @@ public class ZSet implements RedisValue {
     }
 
     public boolean add(byte[] key, double score) {
-        Entry entry = new Entry(new Key(key), score);
+        return add(new Entry(key, score));
+    }
+
+    public boolean add(Entry entry) {
         if (set.add(entry)) {
             sortedSet.add(entry);
             return true;
@@ -56,13 +63,31 @@ public class ZSet implements RedisValue {
         return false;
     }
 
-    public boolean remove(byte[] key) {
-        Entry entry = new Entry(new Key(key), 0);
+    public void remove(Entry entry) {
+        if (entry == null) {
+            return;
+        }
+        if (!set.contains(entry)) {
+            return;
+        }
         if (set.remove(entry)) {
             sortedSet.remove(entry);
-            return true;
         }
-        return false;
+    }
+
+    public boolean contains(Entry entry) {
+        return set.contains(entry);
+    }
+
+    public Entry get(byte[] key) {
+        return get(new Entry(new Key(key), 0));
+    }
+
+    public Entry get(Entry entry) {
+        if (set.contains(entry)) {
+            return set.getMember(entry);
+        }
+        return null;
     }
 
     @Override
