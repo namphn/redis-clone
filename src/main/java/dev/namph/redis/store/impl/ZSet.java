@@ -2,6 +2,7 @@ package dev.namph.redis.store.impl;
 
 import dev.namph.redis.store.RedisValue;
 
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
@@ -49,6 +50,11 @@ public class ZSet implements RedisValue {
             if (cmp == 0) return this.key.hashCode() - o.key.hashCode();
             return cmp;
         }
+    }
+
+    public List<Entry> getRange(double min, double max) {
+        return sortedSet.subSet(new Entry(new Key(new byte[0]), min), true,
+                new Entry(new Key(new byte[0]), max), true).stream().toList();
     }
 
     public boolean add(byte[] key, double score) {
