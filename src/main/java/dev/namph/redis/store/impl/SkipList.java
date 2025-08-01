@@ -1,21 +1,20 @@
 package dev.namph.redis.store.impl;
 
-public class SkipList {
+public class SkipList<T> {
     private final static int MAX_LEVEL = 32;
-    private Node head;
-    private Node tail;
+    private Node<T> head;
+    private Node<T> tail;
     private int level;
     private int size;
-    private OASet<Node> set;
     private final static double P = 0.25;
 
-    private static class Node {
-        private Key key;
-        private double score;
+    private static class Node<T> {
+        private final T key;
+        private final double score;
         private Node backward;
-        private Level[] levels;
+        private final Level[] levels;
 
-        Node(Key key, double score, int height) {
+        Node(T key, double score, int height) {
             this.key = key;
             this.score = score;
             levels = new Level[height];
@@ -39,14 +38,13 @@ public class SkipList {
         this.head = new Node(new Key(new byte[0]), Double.NEGATIVE_INFINITY, MAX_LEVEL);
         this.level = 1;
         this.size = 0;
-        this.set = new OASet<>();
     }
 
-    public void addOrUpdate (Key key, double score) {
+    public void addOrUpdate (T key, double score) {
         int lvl = randomLevel();
-        Node newNode = new Node(key, score, lvl);
-        Node current = head;
-        Node[] update = new Node[MAX_LEVEL];
+        Node<T> newNode = new Node<>(key, score, lvl);
+        Node<T> current = head;
+        Node<T>[] update = new Node[MAX_LEVEL];
         int[] spans = new int[MAX_LEVEL];
 
         for (int i = level - 1; i >= 0; i--) {
@@ -88,7 +86,6 @@ public class SkipList {
         }
 
         size++;
-        set.add(newNode);
     }
 
     private int randomLevel() {
