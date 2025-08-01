@@ -40,7 +40,7 @@ public class SkipList<T> {
         this.size = 0;
     }
 
-    public void addOrUpdate (T key, double score) {
+    public void add(T key, double score) {
         int lvl = randomLevel();
         Node<T> newNode = new Node<>(key, score, lvl);
         Node<T> current = head;
@@ -86,6 +86,39 @@ public class SkipList<T> {
         }
 
         size++;
+    }
+
+    public void remove(T key, double score) {
+        Node<T> current = head;
+        Node<T>[] update = new Node[MAX_LEVEL];
+
+        for (int i = level - 1; i >= 0; i--) {
+            while (current.levels[i].forward != null && current.levels[i].forward.score < score) {
+                current = current.levels[i].forward;
+            }
+            update[i] = current;
+        }
+
+        if (current.levels[0].forward != null && current.levels[0].forward.key.equals(key)) {
+            Node<T> toRemove = current.levels[0].forward;
+
+            for (int i = 0; i < toRemove.levels.length; i++) {
+                if (update[i] == head && toRemove.backward == null) {
+                    head = toRemove.levels[i].forward; // remove head
+                    head.levels[i].span += toRemove.levels[i].span - 1; // adjust span
+                } else {
+                    update[i].levels[i].forward = toRemove.levels[i].forward;
+                    update[i].levels[i].span += toRemove.levels[i].span - 1; // adjust span
+                }
+                if (toRemove.levels[i].forward != null) {
+                    toRemove.levels[i].forward.backward = update[i];
+                } else {
+                    tail = update[i]; // update tail if this is the last node
+                }
+            }
+
+            size--;
+        }
     }
 
     private int randomLevel() {

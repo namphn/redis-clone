@@ -58,24 +58,24 @@ public class ZRangeCommand implements RedisCommand, NeedsStore {
         }
 
         // Get the range of elements
-        var range = ((ZSet) zSet).getRange(start, end);
-        if (range.isEmpty()) {
-            return encoder.encodeNil();
-        }
-
-        try {
-            validateOptionalArgument(argv, 4);
-        } catch (IllegalArgumentException e) {
-            return encoder.encodeError(e.getMessage());
-        }
-
-        List<byte[]> result = new ArrayList<>(range.size());
-        for (ZSet.Entry entry : range) {
-            result.add(entry.getValue());
-        }
+//        var range = ((ZSet) zSet).getRange(start, end);
+//        if (range.isEmpty()) {
+//            return encoder.encodeNil();
+//        }
+//
+//        try {
+//            validateOptionalArgument(argv, 4);
+//        } catch (IllegalArgumentException e) {
+//            return encoder.encodeError(e.getMessage());
+//        }
+//
+//        List<byte[]> result = new ArrayList<>(range.size());
+//        for (ZSet.Entry entry : range) {
+//            result.add(entry.getValue());
+//        }
 
         // Encode the result as a bulk string array
-        return encoder.encodeArray(range);
+        return encoder.encodeNil();
     }
 
     private void validateOptionalArgument(List<byte[]> argv, int index) {

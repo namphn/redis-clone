@@ -1,23 +1,20 @@
 package dev.namph.redis.store.impl;
 
 import dev.namph.redis.store.RedisValue;
-
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.TreeSet;
 
 public class ZSet implements RedisValue {
     private final OASet<Entry> set;
-    private final NavigableSet<Entry> sortedSet;
+    private final SkipList<Key> sortedSet;
 
     public ZSet() {
         this.set = new OASet<>();
-        this.sortedSet = new TreeSet<>();
+        this.sortedSet = new SkipList<>();
     }
 
-    public static final class Entry implements Comparable<Entry> {
+    public static class Entry {
         private final Key key;
-        private double score;
+        private final double score;
 
         public Entry(byte[] key, double score) {
             this(new Key(key), score);
@@ -28,8 +25,12 @@ public class ZSet implements RedisValue {
             this.score = score;
         }
 
-        public void setScore(double score) {
-            this.score = score;
+        public Key getKey() {
+            return key;
+        }
+
+        public double getScore() {
+            return score;
         }
 
         @Override
@@ -43,29 +44,27 @@ public class ZSet implements RedisValue {
         public int hashCode() {
             return key.hashCode();
         }
-
-        @Override
-        public int compareTo(Entry o) {
-            int cmp = Double.compare(this.score, o.score);
-            if (cmp == 0) return this.key.hashCode() - o.key.hashCode();
-            return cmp;
-        }
-    }
-
-    public List<Entry> getRange(double min, double max) {
-        return sortedSet.subSet(new Entry(new Key(new byte[0]), min), true,
-                new Entry(new Key(new byte[0]), max), true).stream().toList();
     }
 
     public boolean add(byte[] key, double score) {
-        return add(new Entry(key, score));
+        return this.add(new Entry(key, score));
     }
 
     public boolean add(Entry entry) {
+        if (entry == null || entry.getKey() == null) {
+            return false;
+        }
+        // Check if the key already exists and has a different score -> need to update
+        if (set.contains(entry) && set.getMember(entry).score != entry.score) {
+            sortedSet.remove(entry.getKey(), entry.score);
+            set.remove(entry);
+        }
+
         if (set.add(entry)) {
-            sortedSet.add(entry);
+            sortedSet.add(entry.getKey(), entry.score);
             return true;
         }
+
         return false;
     }
 
@@ -77,7 +76,7 @@ public class ZSet implements RedisValue {
             return;
         }
         if (set.remove(entry)) {
-            sortedSet.remove(entry);
+            sortedSet.remove(new Key(entry.getKey().getVal()), entry.getScore() );
         }
     }
 
