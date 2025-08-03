@@ -101,6 +101,12 @@ public class ZSet implements RedisValue {
         }).toList();
     }
 
+    public List<Entry> getRangeByRankReversed(int start, int end, int limit, int offset) {
+        return sortedSet.getReverseByRank(start, end, limit, offset).stream().parallel().map(node -> {
+            return new Entry(node.getKey(), node.getScore());
+        }).toList();
+    }
+
     public List<Entry> getRangeByScore(double minScore, double maxScore, int limit, int offset) {
         return sortedSet.getByScore(minScore, maxScore, limit, offset).stream().parallel().map(node -> {
             return new Entry(node.getKey(), node.getScore());

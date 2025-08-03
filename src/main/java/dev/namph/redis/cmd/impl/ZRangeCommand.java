@@ -57,13 +57,16 @@ public class ZRangeCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("WRONGTYPE Operation against a key holding the wrong kind of value");
         }
 
+        List<byte[]> result;
+        // Reset optional arguments before processing
+        resetOptionalArgument();
         try {
             validateOptionalArgument(argv);
+            result = fetchZSet((ZSet) zSet);
         } catch (IllegalArgumentException e) {
             return encoder.encodeError(e.getMessage());
         }
 
-        List<byte[]> result = fetchZSet((ZSet) zSet);
         if (result.isEmpty()) {
             return encoder.encodeNil();
         }
@@ -150,7 +153,7 @@ public class ZRangeCommand implements RedisCommand, NeedsStore {
         }
     }
 
-    private List<byte[]> fetchZSet(ZSet zSet) {
+    private List<byte[]> fetchZSet(ZSet zSet) throws IllegalArgumentException {
         List<byte[]> result = new ArrayList<>();
         if (byScore) {
             if (rev) {
@@ -195,14 +198,43 @@ public class ZRangeCommand implements RedisCommand, NeedsStore {
             }
         } else {
             // Default range
-            var range = zSet.getRangeByRank(start, end, limitCount, limitOffset);
-            for (ZSet.Entry entry : range) {
-                result.add(entry.getKey().getVal());
-                if (withScores) {
-                    result.add(String.valueOf(entry.getScore()).getBytes(StandardCharsets.UTF_8));
+            if (rev) {
+                // Get range by rank in reverse order
+                var range = zSet.getRangeByRankReversed(start, end, limitCount, limitOffset);
+                for (ZSet.Entry entry : range) {
+                    result.add(entry.getKey().getVal());
+                    if (withScores) {
+                        result.add(String.valueOf(entry.getScore()).getBytes(StandardCharsets.UTF_8));
+                    }
+                }
+            } else {
+                var range = zSet.getRangeByRank(start, end, limitCount, limitOffset);
+                for (ZSet.Entry entry : range) {
+                    result.add(entry.getKey().getVal());
+                    if (withScores) {
+                        result.add(String.valueOf(entry.getScore()).getBytes(StandardCharsets.UTF_8));
+                    }
                 }
             }
+
         }
         return result;
+    }
+
+    private void resetOptionalArgument() {
+        byScore = false;
+        byLex = false;
+        rev = false;
+        withScores = false;
+        limitOffset = 0;
+        limitCount = 0;
+        start = 0;
+        end = 0;
+        startScore = 0.0;
+        endScore = 0.0;
+        startLex = new byte[0];
+        endLex = new byte[0];
+        includeStartLex = false;
+        includeEndLex = false;
     }
 }

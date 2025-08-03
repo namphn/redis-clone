@@ -138,20 +138,21 @@ public class SkipList<T> {
         }
     }
 
+    @SuppressWarnings( "unchecked" )
     public List<Node<T>> getByScore(double minScore, double maxScore, int offset, int limit) {
         Node<T> current = head;
         List<Node<T>> result = new java.util.ArrayList<>();
         int count = 0;
 
         for (int i = level - 1; i >= 0; i--) {
-            while (current.levels[i].forward != null && current.levels[i].forward.score < minScore) {
+            while (current.levels[i].forward != null && current.levels[i].forward.score <= minScore) {
                 current = current.levels[i].forward;
             }
         }
 
         while (current != null && current.score <= maxScore) {
             if (current.score >= minScore) {
-                if (count >= offset && limit != 0 && result.size() < limit) {
+                if (count >= offset && (limit == 0 || result.size() < limit)) {
                     result.add(current);
                 }
                 count++;
@@ -162,6 +163,7 @@ public class SkipList<T> {
         return result;
     }
 
+    @SuppressWarnings( "unchecked" )
     public List<Node<T>> getReverseByScore(double minScore, double maxScore, int offset, int limit) {
         Node<T> current = tail;
         for (int i = level - 1; i >= 0; i--) {
@@ -174,7 +176,7 @@ public class SkipList<T> {
         List<Node<T>> result = new java.util.ArrayList<>();
         int count = 0;
         while (current != null && current.score >= minScore) {
-            if (count >= offset && limit != 0 && result.size() < limit) {
+            if (count >= offset && (limit == 0 || result.size() < limit)) {
                 result.add(current);
                 count++;
                 current = current.backward;
@@ -192,23 +194,53 @@ public class SkipList<T> {
             throw new IllegalArgumentException("Invalid range values");
         }
         Node<T> current = head;
-        int tranvelsal = 0;
+        int tranvelsal = -1;
         for (int i = level - 1; i >= 0; i--) {
             while (current.levels[i].forward != null && current.levels[i].span + tranvelsal <= start) {
-                current = current.levels[i].forward;
                 tranvelsal += current.levels[i].span;
+                current = current.levels[i].forward;
             }
         }
 
         List<Node<T>> result = new java.util.ArrayList<>();
         int count = 0;
         while (current != null && tranvelsal <= end) {
-            if (count >= offset && (limit == 0 || result.size() < limit)) {
+            if (count >= offset && (limit == 0 || result.size() <= limit)) {
                 result.add(current);
             }
             count++;
             current = current.levels[0].forward;
             tranvelsal++;
+        }
+        return result;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public List<Node<T>> getReverseByRank(int start, int end, int limit, int offset) {
+        if (start < 0 || end < 0 || start > end) {
+            throw new IllegalArgumentException("Invalid range values");
+        }
+        int tempStart = start;
+        start = size - end - 1; // Convert to reverse rank
+        end = size - tempStart - 1; // Convert to reverse rank
+        Node<T> current = head;
+        int tranvelsal = -1;
+        for (int i = level - 1; i >= 0; i--) {
+            while (current.levels[i].forward != null && current.levels[i].span + tranvelsal <= end) {
+                tranvelsal += current.levels[i].span;
+                current = current.levels[i].forward;
+            }
+        }
+
+        List<Node<T>> result = new ArrayList<>();
+        int count = 0;
+        while (current != null && tranvelsal >= start) {
+            if (count >= offset && (limit == 0 || result.size() < limit)) {
+                result.add(current);
+            }
+            count++;
+            current = current.backward;
+            tranvelsal--;
         }
         return result;
     }
