@@ -95,6 +95,38 @@ public class ZSet implements RedisValue {
         return null;
     }
 
+    public List<Entry> getRangeByRank(int start, int end, int limit, int offset) {
+        return sortedSet.getByRank(start, end, limit, offset).stream().parallel().map(node -> {
+            return new Entry(node.getKey(), node.getScore());
+        }).toList();
+    }
+
+    public List<Entry> getRangeByScore(double minScore, double maxScore, int limit, int offset) {
+        return sortedSet.getByScore(minScore, maxScore, limit, offset).stream().parallel().map(node -> {
+            return new Entry(node.getKey(), node.getScore());
+        }).toList();
+    }
+
+    public List<Entry> getRangeByScoreReversed(double minScore, double maxScore, int limit, int offset) {
+        return sortedSet.getReverseByScore(minScore, maxScore, limit, offset).stream().parallel().map(node -> {
+            return new Entry(node.getKey(), node.getScore());
+        }).toList();
+    }
+
+    public List<Entry> getRangeByLex(byte[] start, byte[] end, int limit, int offset, boolean includeStart, boolean includeEnd) {
+        return sortedSet.getByAlphabetical(new Key(start), new Key(end), limit, offset, includeStart, includeEnd).stream().parallel().map(node -> {
+            return new Entry(node.getKey(), node.getScore());
+        }).toList();
+    }
+
+    public List<Entry> getRangeByLexReversed(byte[] start, byte[] end, int limit, int offset, boolean includeStart, boolean includeEnd) {
+        return sortedSet.getReverseByAlphabetical(new Key(start), new Key(end), limit, offset, includeStart, includeEnd).stream().parallel().map(node -> {
+            return new Entry(node.getKey(), node.getScore());
+        }).toList();
+    }
+
+
+
     @Override
     public Type getType() {
         return Type.ZSET;

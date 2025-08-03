@@ -17,3 +17,4 @@ dev.namph.redis.cmd.impl.SRandMember
 dev.namph.redis.cmd.impl.HSetCommand
 dev.namph.redis.cmd.impl.HGetCommand
 dev.namph.redis.cmd.impl.ZAddCommand
+dev.namph.redis.cmd.impl.ZRangeCommand
