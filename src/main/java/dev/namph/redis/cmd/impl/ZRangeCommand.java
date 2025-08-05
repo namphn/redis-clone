@@ -86,7 +86,6 @@ public class ZRangeCommand implements RedisCommand, NeedsStore {
             index++;
         } else if (index < argv.size() && "BYLEX".equalsIgnoreCase(new String(argv.get(index)))) {
             byLex = true;
-            index++;
             var startLexStr = new String(argv.get(2));
             var endLexStr = new String(argv.get(3));
 
@@ -94,8 +93,8 @@ public class ZRangeCommand implements RedisCommand, NeedsStore {
                 throw new IllegalArgumentException("ERR min or max not valid string range item");
             }
 
-            var startLexOption = startLexStr.charAt(1);
-            var endLexOption = endLexStr.charAt(1);
+            var startLexOption = startLexStr.charAt(0);
+            var endLexOption = endLexStr.charAt(0);
 
             if (startLexOption != '[' && startLexOption != '(' && startLexOption != '-') {
                 throw new IllegalArgumentException("ERR min or max not valid string range item");
@@ -107,8 +106,11 @@ public class ZRangeCommand implements RedisCommand, NeedsStore {
             includeStartLex = startLexOption == '[';
             includeEndLex = endLexOption == '[';
 
+            this.startLex = new byte[argv.get(2).length - 1];
+            this.endLex = new byte[argv.get(3).length - 1];
             System.arraycopy(argv.get(2), 1, this.startLex, 0, argv.get(2).length - 1);
             System.arraycopy(argv.get(3), 1, this.endLex, 0, argv.get(3).length - 1);
+            index++;
         } else {
             // Default case:
             try {

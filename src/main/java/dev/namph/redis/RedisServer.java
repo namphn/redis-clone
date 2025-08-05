@@ -4,7 +4,10 @@ import dev.namph.redis.cmd.impl.CommandRegistry;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
+import dev.namph.redis.store.TTLStore;
+import dev.namph.redis.store.impl.Key;
 import dev.namph.redis.store.impl.KeyValueStore;
+import dev.namph.redis.store.impl.SimpleTTLStore;
 import dev.namph.redis.util.Singleton;
 import org.slf4j.Logger;
 import java.io.IOException;
@@ -23,9 +26,10 @@ public class RedisServer {
     private final Integer port;
     private static final int DEFAULT_PORT = 6380;
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(RedisServer.class);
-    private final IStore store = new KeyValueStore();
-    private final ProtocolEncoder encoder = Singleton.getResp2Encoder();
-    private final CommandRegistry commandRegistry = new CommandRegistry(store, encoder);
+    private final IStore store;
+    private final TTLStore<Key> ttlStore;
+    private final ProtocolEncoder encoder;
+    private final CommandRegistry commandRegistry;
 
     /**
      * Constructor for RedisServer.
@@ -33,6 +37,10 @@ public class RedisServer {
      */
     public RedisServer(Integer port) {
         this.port = port != null ? port : DEFAULT_PORT;
+        store = new KeyValueStore();
+        ttlStore = new SimpleTTLStore<>();
+        encoder = Singleton.getResp2Encoder();
+        commandRegistry = new CommandRegistry(store, encoder, ttlStore);
     }
 
     /**

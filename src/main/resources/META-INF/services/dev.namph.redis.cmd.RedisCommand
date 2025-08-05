@@ -18,3 +18,4 @@ dev.namph.redis.cmd.impl.HSetCommand
 dev.namph.redis.cmd.impl.HGetCommand
 dev.namph.redis.cmd.impl.ZAddCommand
 dev.namph.redis.cmd.impl.ZRangeCommand
+dev.namph.redis.cmd.impl.ExpireCommand

@@ -267,7 +267,7 @@ public class SkipList<T> {
         List<Node<T>> result = new ArrayList<>();
         int count = 0;
         while (current != null && lessThan(current, new Node<T>(end, firstScore, 0))) {
-            if (count >= offset && limit != 0 && result.size() < limit) {
+            if (count >= offset && (limit == 0 || result.size() < limit)) {
                 result.add(current);
                 count++;
             }
@@ -303,7 +303,7 @@ public class SkipList<T> {
         List<Node<T>> result = new ArrayList<>();
         int count = 0;
         while (current != null && lessThan(new Node<T>(start, lastScore, 0), current)) {
-            if (count >= offset && limit != 0 && result.size() < limit) {
+            if (count >= offset && (limit == 0 || result.size() < limit)) {
                 result.add(current);
                 count++;
             }
