@@ -37,8 +37,8 @@ public class RedisServer {
      */
     public RedisServer(Integer port) {
         this.port = port != null ? port : DEFAULT_PORT;
-        store = new KeyValueStore();
         ttlStore = new SimpleTTLStore<>();
+        store = new KeyValueStore(ttlStore);
         encoder = Singleton.getResp2Encoder();
         commandRegistry = new CommandRegistry(store, encoder, ttlStore);
     }
