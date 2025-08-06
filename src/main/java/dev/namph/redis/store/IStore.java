@@ -6,4 +6,5 @@ public interface IStore {
     void set(Key key, RedisValue value);
     RedisValue get(Key key);
     int size();
+    void remove(Key key);
 }

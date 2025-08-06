@@ -8,6 +8,7 @@ import dev.namph.redis.store.TTLStore;
 import dev.namph.redis.store.impl.Key;
 import dev.namph.redis.store.impl.KeyValueStore;
 import dev.namph.redis.store.impl.SimpleTTLStore;
+import dev.namph.redis.store.impl.TTLManager;
 import dev.namph.redis.util.Singleton;
 import org.slf4j.Logger;
 import java.io.IOException;
@@ -30,6 +31,8 @@ public class RedisServer {
     private final TTLStore<Key> ttlStore;
     private final ProtocolEncoder encoder;
     private final CommandRegistry commandRegistry;
+    private final long CLEANUP_INTERVAL_MS = 100; // 100ms
+    private final TTLManager ttlManager;
 
     /**
      * Constructor for RedisServer.
@@ -41,6 +44,7 @@ public class RedisServer {
         store = new KeyValueStore(ttlStore);
         encoder = Singleton.getResp2Encoder();
         commandRegistry = new CommandRegistry(store, encoder, ttlStore);
+        ttlManager = new TTLManager(ttlStore, store);
     }
 
     /**
@@ -58,8 +62,14 @@ public class RedisServer {
 
             logger.info("Redis server started on " + port);
 
+            long lastCleanupTime = System.currentTimeMillis();
             while (true) {
-                selector.select(); // Wait for events
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastCleanupTime >= CLEANUP_INTERVAL_MS) {
+                    ttlManager.activeExpireCycle();
+                    lastCleanupTime = currentTime;
+                }
+                selector.select((int) CLEANUP_INTERVAL_MS); // Wait for events
                 var selectedKeys = selector.selectedKeys();
                 var iterator = selectedKeys.iterator();
 

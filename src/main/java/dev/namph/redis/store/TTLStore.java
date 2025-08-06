@@ -5,5 +5,6 @@ public interface TTLStore<T> {
     long getTTL(T key);
     void removeTTL(T key);
     boolean isExpired(T key);
-
+    T getRandomKeyWithTTL();
+    int size();
 }

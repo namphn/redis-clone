@@ -87,4 +87,18 @@ public class SimpleTTLStore<T> implements TTLStore<T> {
         long currentTime = System.currentTimeMillis();
         return ttlMap.get(key).getExpireAt() <= currentTime;
     }
+
+    @Override
+    public T getRandomKeyWithTTL() {
+        if (ttlKeys.isEmpty()) {
+            return null;
+        }
+        int randomIndex = (int) (Math.random() * ttlKeys.size());
+        return ttlKeys.get(randomIndex);
+    }
+
+    @Override
+    public int size() {
+        return ttlMap.size();
+    }
 }
