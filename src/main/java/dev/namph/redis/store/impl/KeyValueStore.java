@@ -18,6 +18,7 @@ public class KeyValueStore implements IStore {
     @Override
     public void set(Key key, RedisValue value) {
         kv.put(key, value);
+        key.setLastRecentUse();
     }
 
     @Override
@@ -27,6 +28,7 @@ public class KeyValueStore implements IStore {
             ttlStore.removeTTL(key);
             return null;
         }
+        key.setLastRecentUse();
         return kv.get(key);
     }
 

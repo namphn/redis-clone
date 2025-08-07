@@ -5,6 +5,8 @@ import java.util.Arrays;
 public class Key {
     private final byte[] value;
     private final int hash;
+    private final int RESOLUTION = 100; // 100ms resolution
+    int lastRecentUse;
 
     public Key(byte[] key) {
         this.value = key;
@@ -25,5 +27,19 @@ public class Key {
 
     public byte[] getVal() {
         return value;
+    }
+
+    public void setLastRecentUse() {
+        this.lastRecentUse = calculateLRUClock();
+    }
+
+    private int calculateLRUClock() {
+        long now = System.currentTimeMillis() / RESOLUTION;
+        return (int) (now & 0xFFFFFFFFL); // keep 24 bits
+    }
+
+    public int getAge() {
+        int lruClock = calculateLRUClock();
+        return (lruClock - lastRecentUse) & 0xFFFFFF;
     }
 }
