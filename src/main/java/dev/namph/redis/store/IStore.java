@@ -3,8 +3,8 @@ package dev.namph.redis.store;
 import dev.namph.redis.store.impl.Key;
 
 public interface IStore {
-    void set(Key key, RedisValue value);
-    RedisValue get(Key key);
+    void set(byte[] key, RedisValue value);
+    RedisValue get(byte[] key);
     int size();
-    void remove(Key key);
+    void remove(byte[] key);
 }

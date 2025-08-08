@@ -32,8 +32,7 @@ public class LPopCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("ERR syntax error");
         }
 
-        var key = new Key(argv.get(1));
-        var redisValues = store.get(key);
+        var redisValues = store.get(argv.get(1));
 
         if (redisValues == null) {
             return encoder.encodeNil();
@@ -49,7 +48,7 @@ public class LPopCommand implements RedisCommand, NeedsStore {
 
         if (argv.size() == 2) {
             byte[] value = list.removeFirst();
-            store.set(key, list);
+            store.set(argv.get(1), list);
             return encoder.encodeBulkString(value);
         }
 
@@ -65,7 +64,7 @@ public class LPopCommand implements RedisCommand, NeedsStore {
         }
 
         List<byte[]> values = list.removeFirst(count);
-        store.set(key, list);
+        store.set(argv.get(1), list);
         if (values == null || values.isEmpty()) {
             return encoder.encodeNil();
         }

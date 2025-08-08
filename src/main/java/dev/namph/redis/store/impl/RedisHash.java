@@ -18,6 +18,10 @@ public class RedisHash implements RedisValue {
             this.value = value;
         }
 
+        public Key getKey() {
+            return key;
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
@@ -37,12 +41,22 @@ public class RedisHash implements RedisValue {
     }
 
     public boolean add(byte[] key, byte[] value) {
-        Entry entry = new Entry(new Key(key), value);
+        Key keyEntry = new Key(key);
+        keyEntry.setLastRecentUse();
+        Entry entry = new Entry(keyEntry, value);
+        if (set.contains(entry)) {
+            set.getMember(entry).setValue(value);
+        }
         return set.add(entry);
     }
 
     public boolean remove(byte[] key) {
-        return set.remove(new Entry(new Key(key), null));
+        return remove(new Key(key));
+    }
+
+    public boolean remove(Key key) {
+        Entry entry = new Entry(key, null);
+        return set.remove(entry);
     }
 
     public byte[] get(byte[] key) {

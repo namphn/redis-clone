@@ -27,7 +27,6 @@ public class LIndexCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("ERR wrong number of arguments for 'LINDEX' command");
         }
 
-        var key = new Key(argv.get(1));
         long index;
         try {
             index = Long.parseLong(new String(argv.get(2)));
@@ -36,7 +35,7 @@ public class LIndexCommand implements RedisCommand, NeedsStore {
         }
 
         // Retrieve the list from the store
-        var value = store.get(key);
+        var value = store.get(argv.get(1));
         if (value == null ) {
             return encoder.encodeNil();
         }

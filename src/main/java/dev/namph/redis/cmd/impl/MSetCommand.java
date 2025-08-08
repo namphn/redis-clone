@@ -33,9 +33,8 @@ public class MSetCommand implements RedisCommand, NeedsStore {
         }
 
         for (int i = 1; i < argv.size(); i += 2) {
-            var key = new Key(argv.get(i));
             var value = new RedisString(argv.get(i + 1));
-            store.set(key, value);
+            store.set(argv.get(i), value);
         }
 
         return encoder.encodeSimpleString("OK");

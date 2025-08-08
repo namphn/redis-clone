@@ -32,9 +32,7 @@ public class DecrCommand implements RedisCommand, NeedsStore {
         if (argv.size() != 2) {
             return encoder.encodeError("ERR wrong number of arguments for 'decr' command");
         }
-
-        Key key = new Key(argv.get(1));
-        RedisValue redisValue = store.get(key);
+        RedisValue redisValue = store.get(argv.get(1));
 
         if (redisValue != null && !(redisValue instanceof RedisString)) {
             return encoder.encodeError("ERR WRONG TYPE Operation against a key holding the wrong kind of value");
@@ -54,7 +52,8 @@ public class DecrCommand implements RedisCommand, NeedsStore {
 
         // Decrement the value
         value--;
-        store.set(key, new RedisString(value));
+        store.remove(argv.get(1));
+        store.set(argv.get(1), new RedisString(value));
 
         // Return the decremented value as a simple string
         return encoder.encodeInteger(value);

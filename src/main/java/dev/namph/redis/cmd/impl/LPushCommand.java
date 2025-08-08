@@ -28,8 +28,7 @@ public class LPushCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        var key = new Key(argv.get(1));
-        var redisValues = store.get(key);
+        var redisValues = store.get(argv.get(1));
         if (redisValues == null) {
             redisValues = new QuickList();
             QuickList list = (QuickList) redisValues;
@@ -41,7 +40,7 @@ public class LPushCommand implements RedisCommand, NeedsStore {
         for (int i = 2; i < argv.size(); i++) {
             totalElement = list.addFirst(argv.get(i));
         }
-        store.set(key, list);
+        store.set(argv.get(1), list);
         return encoder.encodeInteger(totalElement);
     }
 }

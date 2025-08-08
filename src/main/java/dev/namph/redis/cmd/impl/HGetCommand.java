@@ -28,13 +28,12 @@ public class HGetCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        var key = new Key(argv.get(1));
         if (argv.size() != 3) {
             return encoder.encodeError("ERR wrong number of arguments for 'HGET' command");
         }
 
         var field = argv.get(2);
-        var value = store.get(key);
+        var value = store.get(argv.get(1));
 
         if (value == null) {
             return encoder.encodeNil();

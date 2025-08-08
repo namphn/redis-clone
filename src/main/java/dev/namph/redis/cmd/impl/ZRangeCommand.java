@@ -44,11 +44,8 @@ public class ZRangeCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-
-
-        var key = new Key(argv.get(1));
         // Retrieve the sorted set from the store
-        var zSet = store.get(key);
+        var zSet = store.get(argv.get(1));
         if (zSet == null) {
             return encoder.encodeNil();
         }

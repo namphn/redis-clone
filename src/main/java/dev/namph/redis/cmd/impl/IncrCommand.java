@@ -34,8 +34,7 @@ public class IncrCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("ERR wrong number of arguments for 'incr' command");
         }
 
-        var key = new Key(argv.get(1));
-        var redisValue = store.get(key);
+        var redisValue = store.get(argv.get(1));
         long value;
 
         // Check if the value is a valid RedisString
@@ -56,7 +55,8 @@ public class IncrCommand implements RedisCommand, NeedsStore {
 
         // Increment the value
         value++;
-        store.set(key, new RedisString(value));
+        store.remove(argv.get(1));
+        store.set(argv.get(1), new RedisString(value));
 
         // Return the incremented value as a simple string
         return encoder.encodeInteger(value);

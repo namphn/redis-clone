@@ -31,8 +31,7 @@ public class SRandMember implements RedisCommand, NeedsStore {
     @Override
     @SuppressWarnings("unchecked")
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        var key = new Key(argv.get(1));
-        var value = store.get(key);
+        var value = store.get(argv.get(1));
 
         if (argv.size() > 3) {
             return encoder.encodeError("ERR syntax error");

@@ -33,11 +33,11 @@ public class ZAddCommand implements NeedsStore, RedisCommand {
             return encoder.encodeError("ERR wrong number of arguments for 'ZADD' command");
         }
         int countAdd = 0;
-        var zSet = store.get(new Key(argv.get(1)));
+        var zSet = store.get(argv.get(1));
         if (zSet == null) {
             // If the key does not exist, create a new ZSet
             zSet = new ZSet();
-            store.set(new Key(argv.get(1)), zSet);
+            store.set(argv.get(1), zSet);
         } else if (!(zSet instanceof ZSet)) {
             return encoder.encodeError("WRONGTYPE Operation against a key holding the wrong kind of value");
         }

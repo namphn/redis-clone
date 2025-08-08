@@ -36,7 +36,7 @@ public class TTLManager {
                     break;
                 }
                 if (ttlStore.isExpired(key)) {
-                    store.remove(key);
+                    store.remove(key.getVal());
                     ttlStore.removeTTL(key);
                     expired++;
                     logger.info("Remove key: {}", new String(key.getVal()));

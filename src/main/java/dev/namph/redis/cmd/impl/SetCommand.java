@@ -28,7 +28,6 @@ public class SetCommand implements RedisCommand, NeedsStore {
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        var key = new Key(argv.get(1));
         var value = new RedisString(argv.get(2));
 
         if (argv.size() > 3) {
@@ -38,7 +37,7 @@ public class SetCommand implements RedisCommand, NeedsStore {
             }
         }
         // Store the key-value pair in the store
-        store.set(key, value);
+        store.set(argv.get(1), value);
 
         // Return a simple string response indicating success
         return encoder.encodeSimpleString("OK");

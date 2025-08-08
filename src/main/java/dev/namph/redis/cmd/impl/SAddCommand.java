@@ -30,8 +30,7 @@ public class SAddCommand implements RedisCommand, NeedsStore {
     @Override
     @SuppressWarnings("unchecked")
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        var key = new Key(argv.get(1));
-        var value = store.get(key);
+        var value = store.get(argv.get(1));
 
         if (value != null && !(value instanceof RedisSet)) {
             return encoder.encodeError("WRONG TYPE Operation against a key holding the wrong kind of value");
@@ -40,7 +39,7 @@ public class SAddCommand implements RedisCommand, NeedsStore {
         RedisSet set;
         if (value == null) {
             set = new RedisSet();
-            store.set(key, set);
+            store.set(argv.get(1), set);
         } else {
             set = (RedisSet) value;
         }

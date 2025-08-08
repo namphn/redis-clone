@@ -33,13 +33,12 @@ public class HSetCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("ERR wrong number of arguments for 'HSET' command");
         }
 
-        var key = new Key(argv.get(1));
-        var value = store.get(key);
+        var value = store.get(argv.get(1));
 
         if (value == null) {
             // If the key does not exist, create a new RedisHash
             value = new RedisHash();
-            store.set(key, value);
+            store.set(argv.get(1), value);
         }
 
         if (!(value instanceof RedisHash redisHash)) {

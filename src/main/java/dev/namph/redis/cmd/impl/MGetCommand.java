@@ -33,8 +33,7 @@ public class MGetCommand implements RedisCommand, NeedsStore {
 
         // Iterate over the keys provided in the arguments
         for (int i = 1; i < argv.size(); i++) {
-            Key key = new Key(argv.get(i));
-            var redisValue = store.get(key);
+            var redisValue = store.get(argv.get(i));
             if (redisValue == null) {
                 // If the key does not exist, add a nil response
                 values.add(null);

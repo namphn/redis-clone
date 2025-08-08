@@ -35,8 +35,7 @@ public class ExpireCommand implements RedisCommand, NeedsStore, NeedsTTLStore<Ke
 
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
-        var key = new Key(argv.get(1));
-        var value = store.get(key);
+        var value = store.get(argv.get(1));
         if (value == null) {
             return encoder.encodeInteger(0);
         }
@@ -50,7 +49,7 @@ public class ExpireCommand implements RedisCommand, NeedsStore, NeedsTTLStore<Ke
             return encoder.encodeError("ERR value is not an integer or out of range");
         }
         long expireAt = System.currentTimeMillis() + (seconds * 1000);
-        ttlStore.setTTL(key, expireAt);
+        ttlStore.setTTL(new Key(argv.get(1)), expireAt);
         return encoder.encodeInteger(1);
     }
 }

@@ -32,8 +32,7 @@ public class LLenCommand implements RedisCommand, NeedsStore {
             return encoder.encodeError("ERR wrong number of arguments for 'LLEN' command");
         }
 
-        var key = new Key(argv.get(1));
-        var value = store.get(key);
+        var value = store.get(argv.get(1));
 
         if (value == null) {
             return encoder.encodeInteger(0);
