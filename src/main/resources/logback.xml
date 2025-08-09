@@ -14,10 +14,35 @@
         <appender-ref ref="CONSOLE"/>
     </logger>
 
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- File log sẽ xoay hàng ngày -->
+            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Giữ lại log trong 30 ngày -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Async wrapper -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>10240</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="ROLLING_FILE"/>
+    </appender>
+
     <!-- Logger for server -->
     <logger name="server" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
+
+<!--    &lt;!&ndash; Root logger: chỉ WARN và ERROR &ndash;&gt;-->
+<!--    <root name="server" level="WARN">-->
+<!--        <appender-ref ref="ASYNC_FILE"/>-->
+<!--    </root>-->
 
     <!-- Root -->
     <root level="${ROOT_LEVEL}">

@@ -3,12 +3,10 @@ package dev.namph.redis;
 import dev.namph.redis.cmd.impl.CommandRegistry;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
+import dev.namph.redis.store.EvictionPolicy;
 import dev.namph.redis.store.IStore;
 import dev.namph.redis.store.TTLStore;
-import dev.namph.redis.store.impl.Key;
-import dev.namph.redis.store.impl.KeyValueStore;
-import dev.namph.redis.store.impl.SimpleTTLStore;
-import dev.namph.redis.store.impl.TTLManager;
+import dev.namph.redis.store.impl.*;
 import dev.namph.redis.util.Singleton;
 import org.slf4j.Logger;
 import java.io.IOException;
@@ -43,7 +41,9 @@ public class RedisServer {
         ttlStore = new SimpleTTLStore<>();
         store = new KeyValueStore(ttlStore);
         encoder = Singleton.getResp2Encoder();
-        commandRegistry = new CommandRegistry(store, encoder, ttlStore);
+        EvictionPolicy<Key> evictionPolicy = new AllKeysLRU(store);
+        MemoryManager memoryManager = new MemoryManager(evictionPolicy, store);
+        commandRegistry = new CommandRegistry(store, encoder, ttlStore, memoryManager);
         ttlManager = new TTLManager(ttlStore, store);
     }
 
@@ -131,12 +131,10 @@ public class RedisServer {
             logger.warn("Failed to accept connection: clientChannel is null");
             return;
         }
-        logger.info("Accepted new connection from " + clientChannel.getRemoteAddress());
 
         clientChannel.configureBlocking(false);
         SelectionKey selectionKey = clientChannel.register(selector, SelectionKey.OP_READ);
         Connection connection = new Connection(selectionKey, clientChannel, commandRegistry);
         selectionKey.attach(connection);
-        logger.info("Registered new connection with selector");
     }
 }

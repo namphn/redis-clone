@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class Resp2Encoder implements ProtocolEncoder{
-    private final Logger logger = LoggerFactory.getLogger(Resp2Encoder.class);
     private static final byte[] CRLF = new byte[] {'\r', '\n'};
     private static final byte[] MINUS_ONE_CRLF = new byte[] {'-', '1', '\r', '\n'};
 

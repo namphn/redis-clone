@@ -7,4 +7,5 @@ public interface IStore {
     RedisValue get(byte[] key);
     int size();
     void remove(byte[] key);
+    Key getRandomKey();
 }

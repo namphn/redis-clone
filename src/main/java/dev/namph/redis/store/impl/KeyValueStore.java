@@ -74,8 +74,12 @@ public class KeyValueStore implements IStore {
         kv.remove(new Entry(key, null));
     }
 
-    public void remove(Key key) {
-        kv.remove(key);
-        ttlStore.removeTTL(key);
+    @Override
+    public Key getRandomKey() {
+        if (kv.size() == 0) {
+            return null;
+        }
+        Entry entry = kv.randomOneMember();
+        return entry == null ? null : entry.key;
     }
 }

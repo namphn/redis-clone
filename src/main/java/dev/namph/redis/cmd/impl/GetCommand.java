@@ -42,7 +42,6 @@ public class GetCommand implements RedisCommand, NeedsStore {
 
         if (redisValue == null) {
             // If the key does not exist, return a nil response
-            logger.info("key not found: {}", new String(argv.get(1)));
             return encoder.encodeNil();
         }
 
@@ -50,8 +49,6 @@ public class GetCommand implements RedisCommand, NeedsStore {
             logger.error("WRONG TYPE Operation against a key holding the wrong kind of value");
             return encoder.encodeError("WRONG TYPE Operation against a key holding the wrong kind of value");
         }
-
-        logger.info("found {}", ((RedisString) redisValue).getStringValue());
         // If the key exists, return the value as a bulk string
         return encoder.encodeBulkString(((RedisString) redisValue).getValue());
     }

@@ -1,12 +1,13 @@
 package dev.namph.redis.cmd.impl;
 
 import dev.namph.redis.cmd.Cmd;
+import dev.namph.redis.cmd.NeedMemoryManager;
 import dev.namph.redis.cmd.NeedsStore;
 import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
-import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.MemoryManager;
 import dev.namph.redis.store.impl.RedisString;
 
 import java.util.List;
@@ -17,9 +18,10 @@ import java.util.List;
  * If successful, it returns "OK".
  */
 @Cmd(name = "SET", minArgs = 3)
-public class SetCommand implements RedisCommand, NeedsStore {
+public class SetCommand implements RedisCommand, NeedsStore, NeedMemoryManager {
     private IStore store;
     private ProtocolEncoder encoder;
+    private MemoryManager memoryManager;
 
     @Override
     public void setEncoder(ProtocolEncoder encoder) {
@@ -36,6 +38,7 @@ public class SetCommand implements RedisCommand, NeedsStore {
                 return encoder.encodeError("ERR invalid options for 'set' command");
             }
         }
+        memoryManager.freeMemoryIfNeeded();
         // Store the key-value pair in the store
         store.set(argv.get(1), value);
 
@@ -52,5 +55,10 @@ public class SetCommand implements RedisCommand, NeedsStore {
         // Validate options like EX, PX, NX, XX if provided
         // This is a placeholder for future implementation
         return false;
+    }
+
+    @Override
+    public void setMemoryManager(MemoryManager memoryManager) {
+        this.memoryManager = memoryManager;
     }
 }

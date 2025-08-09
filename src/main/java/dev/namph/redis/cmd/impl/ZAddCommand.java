@@ -1,21 +1,22 @@
 package dev.namph.redis.cmd.impl;
 
 import dev.namph.redis.cmd.Cmd;
+import dev.namph.redis.cmd.NeedMemoryManager;
 import dev.namph.redis.cmd.NeedsStore;
 import dev.namph.redis.cmd.RedisCommand;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
-import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.MemoryManager;
 import dev.namph.redis.store.impl.ZSet;
 
 import java.util.List;
 
 @Cmd(name = "ZADD", minArgs = 4)
-public class ZAddCommand implements NeedsStore, RedisCommand {
+public class ZAddCommand implements NeedsStore, RedisCommand, NeedMemoryManager {
     private IStore store;
     private ProtocolEncoder encoder;
-
+    private MemoryManager memoryManager;
 
     @Override
     public void setStore(IStore store) {
@@ -42,6 +43,7 @@ public class ZAddCommand implements NeedsStore, RedisCommand {
             return encoder.encodeError("WRONGTYPE Operation against a key holding the wrong kind of value");
         }
 
+        memoryManager.freeMemoryIfNeeded();
         for (int i = 2; i < argv.size(); i += 2) {
             double score;
             try {
@@ -61,5 +63,10 @@ public class ZAddCommand implements NeedsStore, RedisCommand {
 
         // Return the number of elements added to the sorted set
         return encoder.encodeInteger(countAdd);
+    }
+
+    @Override
+    public void setMemoryManager(MemoryManager memoryManager) {
+        this.memoryManager = memoryManager;
     }
 }

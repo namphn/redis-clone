@@ -1,14 +1,12 @@
 package dev.namph.redis.cmd.impl;
 
-import dev.namph.redis.cmd.Cmd;
-import dev.namph.redis.cmd.NeedsStore;
-import dev.namph.redis.cmd.NeedsTTLStore;
-import dev.namph.redis.cmd.RedisCommand;
+import dev.namph.redis.cmd.*;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.IStore;
 import dev.namph.redis.store.TTLStore;
 import dev.namph.redis.store.impl.Key;
+import dev.namph.redis.store.impl.MemoryManager;
 import dev.namph.redis.util.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +21,7 @@ public class CommandRegistry {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @SuppressWarnings("unchecked")
-    public CommandRegistry(IStore store, ProtocolEncoder encoder, TTLStore<Key> ttlStore) {
+    public CommandRegistry(IStore store, ProtocolEncoder encoder, TTLStore<Key> ttlStore, MemoryManager manager) {
         ServiceLoader<RedisCommand> loader = ServiceLoader.load(RedisCommand.class);
         for (RedisCommand command : loader) {
             Cmd cmdAnnotation = command.getClass().getAnnotation(Cmd.class);
@@ -38,6 +36,8 @@ public class CommandRegistry {
             if (command instanceof NeedsStore ns) ns.setStore(store);
             command.setEncoder(encoder);
             if (command instanceof NeedsTTLStore nts) nts.setTTLStore(ttlStore);
+
+            if (command instanceof NeedMemoryManager nmm) nmm.setMemoryManager(manager);
 
             commands.put(name, command);
             commandMetadata.put(name, cmdAnnotation);

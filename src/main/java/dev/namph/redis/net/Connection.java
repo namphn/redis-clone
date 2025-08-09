@@ -60,8 +60,6 @@ public class Connection {
             closeConnection();
             return;
         }
-        logger.info("Read " + n + " bytes from " + channel.getRemoteAddress());
-        logger.info("Queue value: " + byteQueue.readString());
 
         // parse and process the command
         while (true) {
@@ -81,7 +79,6 @@ public class Connection {
                 }
                 case COMMAND -> {
                     // Process the command
-                    logger.info("Received command");
                     byte[] res = commandRegistry.dispatch(this, parseResult.args());
                     enqueueWrite(res);
                     enableWrite(); // Enable write operation to send the response
@@ -98,7 +95,6 @@ public class Connection {
      */
     public void onWritable() throws IOException {
         if (writeQueue.isEmpty()) {
-            logger.info("No data to write for " + channel.getRemoteAddress());
             disableWrite(); // Disable write operation if there's nothing to write
             if (closeAfterWrite) {
                 closeConnection(); // Close the connection if we are done writing
@@ -113,7 +109,6 @@ public class Connection {
                 continue;
             }
             int bytesWritten = channel.write(buffer);
-            logger.info("Wrote " + bytesWritten + " bytes to " + channel.getRemoteAddress());
             if (bytesWritten <= 0) {
                 break; // No more data can be written at the moment
             }
