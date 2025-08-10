@@ -37,7 +37,6 @@ public class GetCommand implements RedisCommand, NeedsStore {
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
         // Retrieve the value from the store
-        logger.info("GET key: {}", new String(argv.get(1)));
         var redisValue = store.get(argv.get(1));
 
         if (redisValue == null) {

@@ -13,9 +13,11 @@ import java.util.Deque;
 public class Connection {
     private SelectionKey key;
     private SocketChannel channel;
-    private ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE); // 8KB read buffer
+    private ByteBuffer readBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE); // 8KB read buffer
     private ByteQueue byteQueue = new ByteQueue(BYTE_QUEUE_SIZE); // ByteQueue to hold read data
 
+    private final int WRITE_BUFFER_SIZE = 64 * 1024; //64KB
+    private final ByteBuffer flushBuffer = ByteBuffer.allocateDirect(WRITE_BUFFER_SIZE);
     // allocated 8KB = 2 blocks of 4KB each, which is a common size for network buffers
     private static final int BUFFER_SIZE = 8192;
     // size of the byte queue. double the buffer size to accommodate larger data transfers
@@ -102,15 +104,35 @@ public class Connection {
             return;
         }
 
+        // add all to the buffer and write once
+        flushBuffer.clear();
         while (!writeQueue.isEmpty()) {
             ByteBuffer buffer = writeQueue.peek();
             if (buffer == null || !buffer.hasRemaining()) {
                 writeQueue.poll(); // Remove empty buffers
                 continue;
             }
-            int bytesWritten = channel.write(buffer);
-            if (bytesWritten <= 0) {
-                break; // No more data can be written at the moment
+
+            if (buffer.remaining() > WRITE_BUFFER_SIZE) {
+                break;
+            }
+
+            flushBuffer.put(buffer);
+            writeQueue.poll();
+        }
+
+        flushBuffer.flip();
+        while (flushBuffer.hasRemaining()) {
+            int written = channel.write(flushBuffer);
+            if (written <= 0) break;
+        }
+
+        if (!writeQueue.isEmpty() || flushBuffer.hasRemaining()) {
+            enableWrite();
+        } else {
+            disableWrite();
+            if (closeAfterWrite) {
+                closeConnection();
             }
         }
     }

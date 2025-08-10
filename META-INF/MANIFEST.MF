@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Created-By: Maven JAR Plugin 3.3.0
+Build-Jdk-Spec: 21
+Class-Path: lib/slf4j-api-2.0.13.jar lib/logback-classic-1.5.13.jar lib/
+ logback-core-1.5.13.jar
+Main-Class: dev.namph.redis.Main
+
