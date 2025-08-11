@@ -133,6 +133,7 @@ public class RedisServer {
         }
 
         clientChannel.configureBlocking(false);
+        clientChannel.socket().setTcpNoDelay(true);
         SelectionKey selectionKey = clientChannel.register(selector, SelectionKey.OP_READ);
         Connection connection = new Connection(selectionKey, clientChannel, commandRegistry);
         selectionKey.attach(connection);
