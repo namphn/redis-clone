@@ -43,7 +43,7 @@ project/
 ### Build & Run
 ```bash
 git clone https://github.com/namphn/redis-clone.git
-cd tinyredis
+cd redis-clone
 mvn clean package
 java -jar target/redis-clone-1.0.jar
 ```
@@ -55,12 +55,12 @@ The server will start at:
 You can use redis-cli as a client to connect
 
 ```bash
-redis-cli -p 6379
-127.0.0.1:6379> SET foo bar
+redis-cli -p 6380
+127.0.0.1:6380> SET foo bar
 OK
-127.0.0.1:6379> GET foo
+127.0.0.1:6380> GET foo
 "bar"
-127.0.0.1:6379> EXPIRE foo 5
+127.0.0.1:6380> EXPIRE foo 5
 (integer) 1
 ```
 
