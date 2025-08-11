@@ -42,7 +42,7 @@ project/
 
 ### Build & Run
 ```bash
-git clone https://github.com/yourname/tinyredis.git
+git clone https://github.com/namphn/redis-clone.git
 cd tinyredis
 mvn clean package
 java -jar target/redis-clone-1.0.jar
