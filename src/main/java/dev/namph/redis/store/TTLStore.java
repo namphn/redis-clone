@@ -7,4 +7,5 @@ public interface TTLStore<T> {
     boolean isExpired(T key);
     T getRandomKeyWithTTL();
     int size();
+    boolean isEmpty();
 }

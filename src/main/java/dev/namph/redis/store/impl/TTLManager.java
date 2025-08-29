@@ -17,7 +17,7 @@ public class TTLManager {
     }
 
     public void activeExpireCycle() {
-        if (ttlStore.size() == 0) {
+        if (ttlStore.isEmpty()) {
             return;
         }
 
@@ -26,7 +26,7 @@ public class TTLManager {
             int expired = 0;
             int checked = 0;
 
-            if (ttlStore.size() == 0) {
+            if (ttlStore.isEmpty()) {
                 break;
             }
 

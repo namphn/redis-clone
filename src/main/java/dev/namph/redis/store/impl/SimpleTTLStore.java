@@ -101,4 +101,9 @@ public class SimpleTTLStore<T> implements TTLStore<T> {
     public int size() {
         return ttlMap.size();
     }
+
+    @Override
+    public boolean isEmpty() {
+        return ttlMap.isEmpty();
+    }
 }

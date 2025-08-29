@@ -82,4 +82,9 @@ public class KeyValueStore implements IStore {
         Entry entry = kv.randomOneMember();
         return entry == null ? null : entry.key;
     }
+
+    @Override
+    public boolean contains(byte[] key) {
+        return kv.contains(new Entry(key, null));
+    }
 }

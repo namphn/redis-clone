@@ -8,4 +8,5 @@ public interface IStore {
     int size();
     void remove(byte[] key);
     Key getRandomKey();
+    boolean contains(byte[] key);
 }
