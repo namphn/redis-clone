@@ -20,3 +20,4 @@ dev.namph.redis.cmd.impl.ZAddCommand
 dev.namph.redis.cmd.impl.ZRangeCommand
 dev.namph.redis.cmd.impl.ExpireCommand
 dev.namph.redis.cmd.impl.GetRangeCommand
+dev.namph.redis.cmd.impl.StrLenCommand
