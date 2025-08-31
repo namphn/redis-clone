@@ -31,7 +31,7 @@ public class IncrCommand implements RedisCommand, NeedsStore {
     @Override
     public byte[] execute(Connection connection, List<byte[]> argv) {
         if (argv.size() != 2) {
-            return encoder.encodeError("ERR wrong number of arguments for 'incr' command");
+            return encoder.encodeError("ERR wrong number of arguments for 'INCR' command");
         }
 
         var redisValue = store.get(argv.get(1));
