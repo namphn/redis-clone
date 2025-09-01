@@ -59,4 +59,9 @@ public class RedisSet implements RedisValue {
     public Type getType() {
         return Type.SET;
     }
+
+    @Override
+    public byte[] getByte() {
+        return new byte[0];
+    }
 }

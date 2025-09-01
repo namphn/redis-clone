@@ -4,6 +4,8 @@ import dev.namph.redis.store.IStore;
 import dev.namph.redis.store.RedisValue;
 import dev.namph.redis.store.TTLStore;
 
+import java.util.List;
+
 public class KeyValueStore implements IStore {
     private final OASet<Entry> kv;
     private final TTLStore<Key> ttlStore;
@@ -86,5 +88,11 @@ public class KeyValueStore implements IStore {
     @Override
     public boolean contains(byte[] key) {
         return kv.contains(new Entry(key, null));
+    }
+
+    @Override
+    public Entry[] getAll() {
+       List<Entry> res = kv.getAll();
+       return res.toArray(new Entry[res.size()]);
     }
 }

@@ -9,4 +9,5 @@ public interface IStore {
     void remove(byte[] key);
     Key getRandomKey();
     boolean contains(byte[] key);
+    Object[] getAll();
 }

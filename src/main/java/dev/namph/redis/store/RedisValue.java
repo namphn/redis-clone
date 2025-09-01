@@ -9,4 +9,5 @@ public interface RedisValue {
         HASH
     }
     Type getType();
+    byte[] getByte();
 }

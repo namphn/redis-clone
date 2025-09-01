@@ -26,6 +26,11 @@ public class RedisString implements RedisValue {
         return Type.STRING;
     }
 
+    @Override
+    public byte[] getByte() {
+        return value;
+    }
+
     public String getStringValue() {
         return new String(value);
     }
