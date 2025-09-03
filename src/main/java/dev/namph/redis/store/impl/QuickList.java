@@ -213,4 +213,9 @@ public class QuickList implements RedisValue{
     public Type getType() {
         return Type.LIST;
     }
+
+    @Override
+    public byte[] getByte() {
+        return null; // not implement yet
+    }
 }

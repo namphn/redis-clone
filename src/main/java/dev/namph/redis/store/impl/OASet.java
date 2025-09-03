@@ -28,6 +28,11 @@ public class OASet<T> implements RedisValue {
         return Type.SET;
     }
 
+    @Override
+    public byte[] getByte() {
+        return null;
+    }
+
     public OASet() {
         this(DEFAULT_INITIAL_CAPACITY, DEFAULT_MAX_LOAD);
     }
@@ -256,6 +261,15 @@ public class OASet<T> implements RedisValue {
                 used++;
             }
         }
+    }
+
+    public OASet<T> clone() {
+        OASet<T> newObj = new OASet<>();
+        newObj.size = this.size;
+        newObj.used = this.used;
+        newObj.modCount = this.modCount;
+        newObj.table = Arrays.copyOf(this.table, this.table.length);
+        return newObj;
     }
 
     private  static int fMix32(int h) {

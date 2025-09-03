@@ -2,10 +2,7 @@ package dev.namph.redis.store.impl;
 
 import dev.namph.redis.store.TTLStore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SimpleTTLStore<T> implements TTLStore<T> {
     private final Map<T, Entry> ttlMap;
@@ -36,6 +33,11 @@ public class SimpleTTLStore<T> implements TTLStore<T> {
     public SimpleTTLStore() {
         ttlMap = new HashMap<>();
         ttlKeys = new ArrayList<>();
+    }
+
+    private SimpleTTLStore(Map<T, Entry> ttlMap, List<T> ttlKeys) {
+        this.ttlMap = ttlMap;
+        this.ttlKeys = ttlKeys;
     }
 
     @Override
@@ -105,5 +107,9 @@ public class SimpleTTLStore<T> implements TTLStore<T> {
     @Override
     public boolean isEmpty() {
         return ttlMap.isEmpty();
+    }
+
+    public Set<Map.Entry<T, Entry>> getAll() {
+        return ttlMap.entrySet();
     }
 }

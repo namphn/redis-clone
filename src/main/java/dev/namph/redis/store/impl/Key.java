@@ -13,6 +13,12 @@ public class Key {
         this.hash = Arrays.hashCode(key);
     }
 
+    public Key(Key key) {
+        this.value = key.value.clone();
+        this.hash = key.hash;
+        this.lastRecentUse = key.lastRecentUse;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 public class RdbIO {
     public static void writeLength(DataOutputStream out, int len) throws IOException {
@@ -39,6 +40,16 @@ public class RdbIO {
 
     public static void writeString(DataOutputStream out, String s) throws IOException {
         byte[] b = s.getBytes(StandardCharsets.UTF_8);
+        writeLength(out, b.length);
+        out.write(b);
+    }
+
+    public static void writeDouble(DataOutputStream out, double d) throws IOException {
+        String s = String.format(Locale.US, "%.17g", d);
+        writeString(out, s);
+    }
+
+    public static void writeBytes(DataOutputStream out, byte[] b) throws IOException {
         writeLength(out, b.length);
         out.write(b);
     }

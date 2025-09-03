@@ -131,10 +131,21 @@ public class ZSet implements RedisValue {
         }).toList();
     }
 
-
+    public int size() {
+        return set.size();
+    }
 
     @Override
     public Type getType() {
         return Type.ZSET;
+    }
+
+    @Override
+    public byte[] getByte() {
+        return null;
+    }
+
+    public List<Entry> getAll() {
+        return set.getAll();
     }
 }

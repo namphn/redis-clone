@@ -22,3 +22,4 @@ dev.namph.redis.cmd.impl.ExpireCommand
 dev.namph.redis.cmd.impl.GetRangeCommand
 dev.namph.redis.cmd.impl.StrLenCommand
 dev.namph.redis.cmd.impl.IncrByCommand
+dev.namph.redis.cmd.impl.BgSaveCommand

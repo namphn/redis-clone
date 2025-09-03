@@ -7,52 +7,74 @@ import dev.namph.redis.store.TTLStore;
 import dev.namph.redis.util.RdbIO;
 import dev.namph.redis.util.RdbOpcode;
 import dev.namph.redis.util.RdbType;
+import org.slf4j.Logger;
 
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
 public class RdbPersistence implements PersistenceStrategy {
     private static final String path = "./dump.rdb";
+    private final Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
 
     @Override
     @SuppressWarnings("unchecked")
-    public void save(IStore store, TTLStore ttlStore) {
+    public void save(IStore store) {
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(path))) {
             for (KeyValueStore.Entry entry : (KeyValueStore.Entry[]) store.getAll()) {
                 Key key =  entry.key;
                 byte[] keyByte = key.getVal();
                 RedisValue val = entry.value;
-                if (ttlStore.isExpired(key)) {
+                if (store.isExpired(key)) {
                     out.writeByte(RdbOpcode.RDB_OPCODE_EXPIRETIME_MS);
-                    out.writeLong(ttlStore.getTTL(key));
+                    out.writeLong(store.getTTL(key));
                 }
 
                 switch (val.getType()) {
-                    case RedisValue.Type.STRING:
+                    case RedisValue.Type.STRING -> {
                         out.writeByte(RdbType.RDB_TYPE_STRING);
-                        break;
-                    case RedisValue.Type.SET:
+                        RdbIO.writeBytes(out, keyByte);
+                        RdbIO.writeBytes(out, val.getByte());
+                    }
+                    case RedisValue.Type.SET -> {
                         out.writeByte(RdbType.RDB_TYPE_SET);
-                        break;
-                    case RedisValue.Type.LIST:
+                        var setVal = (RedisSet) val;
+                        RdbIO.writeLength(out, setVal.size());
+                        for (Key k : setVal.getAll()) {
+                            RdbIO.writeBytes(out, k.getVal());
+                        }
+                    }
+                    case RedisValue.Type.LIST -> {
                         out.writeByte(RdbType.RDB_TYPE_LIST);
-                        break;
-                    case RedisValue.Type.ZSET:
+                        QuickList list = (QuickList) val;
+                        RdbIO.writeLength(out, (int) list.size());
+                        for (long i = 0; i < list.size(); i++) {
+                            RdbIO.writeBytes(out, list.get(i));
+                        }
+                    }
+                    case RedisValue.Type.ZSET -> {
                         out.writeByte(RdbType.RDB_TYPE_ZSET);
-                        break;
-                    case RedisValue.Type.HASH:
+                        ZSet set = (ZSet) val;
+                        RdbIO.writeLength(out, set.size());
+                        for (ZSet.Entry zEntry : set.getAll()) {
+                            RdbIO.writeDouble(out, zEntry.getScore());
+                            RdbIO.writeBytes(out, zEntry.getKey().getVal());
+                        }
+                    }
+                    case RedisValue.Type.HASH -> {
                         out.writeByte(RdbType.RDB_TYPE_HASH);
-                        break;
+                        RedisHash hash = (RedisHash) val;
+                        RdbIO.writeLength(out, hash.size());
+                        for (RedisHash.Entry hEntry : hash.getAll()) {
+                            RdbIO.writeBytes(out, hEntry.getKey().getVal());
+                            RdbIO.writeBytes(out, hEntry.getValue());
+                        }
+                    }
                 }
-
-                out.write(keyByte);
-
             }
         } catch (IOException e) {
-
+            logger.error("Error when dumping to file", e);
         }
     }
 

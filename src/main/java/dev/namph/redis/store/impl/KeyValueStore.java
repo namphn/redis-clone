@@ -5,10 +5,11 @@ import dev.namph.redis.store.RedisValue;
 import dev.namph.redis.store.TTLStore;
 
 import java.util.List;
+import java.util.Map;
 
 public class KeyValueStore implements IStore {
-    private final OASet<Entry> kv;
-    private final TTLStore<Key> ttlStore;
+    private OASet<Entry> kv;
+    private TTLStore<Key> ttlStore;
 
     public static class Entry {
         public final Key key;
@@ -95,4 +96,37 @@ public class KeyValueStore implements IStore {
        List<Entry> res = kv.getAll();
        return res.toArray(new Entry[res.size()]);
     }
+
+    private void setKeyValueStore(OASet<Entry> kv) {
+        this.kv = kv;
+    }
+
+    @Override
+    public IStore clone() {
+        SimpleTTLStore<Key> cloneTTl = new SimpleTTLStore<>();
+        for (Map.Entry<Key, SimpleTTLStore.Entry> entry : ((SimpleTTLStore<Key>) ttlStore).getAll()) {
+            var key = new Key(entry.getKey());
+            cloneTTl.setTTL(key, entry.getValue().getExpireAt());
+        }
+        KeyValueStore cloneStore = new KeyValueStore(cloneTTl);
+        cloneStore.setKeyValueStore(kv.clone());
+        return cloneStore;
+    }
+
+    @Override
+    public TTLStore getTTLStore() {
+        return ttlStore;
+    }
+
+    @Override
+    public boolean isExpired(Key key) {
+        return ttlStore.isExpired(key);
+    }
+
+    @Override
+    public long getTTL(Key key) {
+        return ttlStore.getTTL(key);
+    }
+
+
 }

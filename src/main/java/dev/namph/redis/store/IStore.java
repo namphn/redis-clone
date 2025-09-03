@@ -10,4 +10,8 @@ public interface IStore {
     Key getRandomKey();
     boolean contains(byte[] key);
     Object[] getAll();
+    IStore clone();
+    TTLStore getTTLStore();
+    boolean isExpired(Key key);
+    long getTTL(Key key);
 }

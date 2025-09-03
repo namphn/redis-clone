@@ -2,6 +2,8 @@ package dev.namph.redis.store.impl;
 
 import dev.namph.redis.store.RedisValue;
 
+import java.util.List;
+
 public class RedisHash implements RedisValue {
     private final OASet<Entry> set;
 
@@ -20,6 +22,10 @@ public class RedisHash implements RedisValue {
 
         public Key getKey() {
             return key;
+        }
+
+        public byte[] getValue() {
+            return value;
         }
 
         @Override
@@ -67,8 +73,21 @@ public class RedisHash implements RedisValue {
         return null;
     }
 
+    public int size() {
+        return set.size();
+    }
+
     @Override
     public Type getType() {
         return null;
+    }
+
+    @Override
+    public byte[] getByte() {
+        return new byte[0];
+    }
+
+    public List<Entry> getAll() {
+        return set.getAll();
     }
 }

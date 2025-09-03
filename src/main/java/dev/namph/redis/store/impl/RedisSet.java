@@ -62,6 +62,6 @@ public class RedisSet implements RedisValue {
 
     @Override
     public byte[] getByte() {
-        return new byte[0];
+        return null;
     }
 }
