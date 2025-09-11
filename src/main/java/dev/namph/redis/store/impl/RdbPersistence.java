@@ -22,6 +22,11 @@ public class RdbPersistence implements PersistenceStrategy {
     @SuppressWarnings("unchecked")
     public void save(IStore store) {
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(path))) {
+            var kvStore = (KeyValueStore.Entry[]) store.getAll();
+            if (kvStore == null || kvStore.length == 0) {
+                return;
+            }
+
             for (KeyValueStore.Entry entry : (KeyValueStore.Entry[]) store.getAll()) {
                 Key key =  entry.key;
                 byte[] keyByte = key.getVal();

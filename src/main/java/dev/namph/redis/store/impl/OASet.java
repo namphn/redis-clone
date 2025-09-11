@@ -269,6 +269,14 @@ public class OASet<T> implements RedisValue {
         newObj.used = this.used;
         newObj.modCount = this.modCount;
         newObj.table = Arrays.copyOf(this.table, this.table.length);
+        for (int i = 0; i < this.table.length; i++) {
+            if (this.table[i] == EMPTY) {
+                newObj.table[i] = newObj.EMPTY;
+            }
+            if (this.table[i] == TOMB) {
+                newObj.table[i] = newObj.TOMB;
+            }
+        }
         return newObj;
     }
 

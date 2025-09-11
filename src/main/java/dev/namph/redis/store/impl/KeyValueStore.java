@@ -24,6 +24,16 @@ public class KeyValueStore implements IStore {
             this.value = value;
         }
 
+        public Entry(Object obj) {
+            if (obj instanceof Entry entry) {
+                this.key = entry.key;
+                this.value = entry.value;
+            } else {
+                this.key = null;
+                this.value = null;
+            }
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
