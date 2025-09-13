@@ -8,4 +8,5 @@ public interface TTLStore<T> {
     T getRandomKeyWithTTL();
     int size();
     boolean isEmpty();
+    void clear();
 }

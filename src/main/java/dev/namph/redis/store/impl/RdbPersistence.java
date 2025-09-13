@@ -9,9 +9,7 @@ import dev.namph.redis.util.RdbOpcode;
 import dev.namph.redis.util.RdbType;
 import org.slf4j.Logger;
 
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 public class RdbPersistence implements PersistenceStrategy {
@@ -85,7 +83,63 @@ public class RdbPersistence implements PersistenceStrategy {
 
     @Override
     public void load(IStore store) {
-
+        store.clear();
+        try (DataInputStream in = new DataInputStream(new FileInputStream(path))) {
+            long expireAt = -1;
+            while (in.available() > 0) {
+                int type = in.readUnsignedByte();
+                if (type == RdbOpcode.RDB_OPCODE_EXPIRETIME_MS) {
+                    expireAt = in.readLong();
+                } else {
+                    byte[] key = RdbIO.readBytes(in);
+                    switch (type) {
+                        case RdbType.RDB_TYPE_STRING -> {
+                            byte[] value = RdbIO.readBytes(in);
+                            store.set(key, new RedisString(value));
+                        }
+                        case RdbType.RDB_TYPE_SET -> {
+                            int size = (int) RdbIO.readLength(in);
+                            RedisSet set = new RedisSet();
+                            for (int i = 0; i < size; i++) {
+                                byte[] member = RdbIO.readBytes(in);
+                                set.add(new Key(member));
+                            }
+                            store.set(key, set);
+                        }
+                        case RdbType.RDB_TYPE_LIST -> {
+                            int size = (int) RdbIO.readLength(in);
+                            QuickList list = new QuickList();
+                            for (int i = 0; i < size; i++) {
+                                byte[] item = RdbIO.readBytes(in);
+                                list.addLast(item);
+                            }
+                            store.set(key, list);
+                        }
+                        case RdbType.RDB_TYPE_ZSET -> {
+                            int size = (int) RdbIO.readLength(in);
+                            ZSet zset = new ZSet();
+                            for (int i = 0; i < size; i++) {
+                                double score = RdbIO.readDouble(in);
+                                byte[] member = RdbIO.readBytes(in);
+                                zset.add(new ZSet.Entry(new Key(member), score));
+                            }
+                            store.set(key, zset);
+                        }
+                        case RdbType.RDB_TYPE_HASH -> {
+                            int size = (int) RdbIO.readLength(in);
+                            RedisHash hash = new RedisHash();
+                            for (int i = 0; i < size; i++) {
+                                byte[] field = RdbIO.readBytes(in);
+                                byte[] value = RdbIO.readBytes(in);
+                                hash.add(field, value);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error when loading from file", e);
+        }
     }
 
     @Override

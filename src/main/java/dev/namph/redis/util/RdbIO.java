@@ -54,6 +54,25 @@ public class RdbIO {
         out.write(b);
     }
 
+    public static byte[] readBytes(InputStream in) throws IOException {
+        int len = readLength(new DataInputStream(in));
+        byte[] b = new byte[len];
+        int read = 0;
+        while (read < len) {
+            int n = in.read(b, read, len - read);
+            if (n == -1) {
+                throw new IOException("Unexpected end of stream");
+            }
+            read += n;
+        }
+        return b;
+    }
+
+    public static double readDouble(DataInputStream in) throws IOException {
+        String s = readString(in);
+        return Double.parseDouble(s);
+    }
+
     public static String readString(DataInputStream in) throws IOException {
         int len = readLength(in);
         byte[] b = new byte[len];

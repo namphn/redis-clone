@@ -138,5 +138,9 @@ public class KeyValueStore implements IStore {
         return ttlStore.getTTL(key);
     }
 
-
+    @Override
+    public void clear() {
+        kv.clear();
+        ttlStore.clear();
+    }
 }

@@ -109,6 +109,12 @@ public class SimpleTTLStore<T> implements TTLStore<T> {
         return ttlMap.isEmpty();
     }
 
+    @Override
+    public void clear() {
+        ttlMap.clear();
+        ttlKeys.clear();
+    }
+
     public Set<Map.Entry<T, Entry>> getAll() {
         return ttlMap.entrySet();
     }

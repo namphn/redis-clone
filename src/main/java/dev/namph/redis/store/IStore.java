@@ -14,4 +14,5 @@ public interface IStore {
     TTLStore getTTLStore();
     boolean isExpired(Key key);
     long getTTL(Key key);
+    void clear();
 }
