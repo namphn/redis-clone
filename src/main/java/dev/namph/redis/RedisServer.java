@@ -5,6 +5,7 @@ import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
 import dev.namph.redis.store.EvictionPolicy;
 import dev.namph.redis.store.IStore;
+import dev.namph.redis.store.PersistenceStrategy;
 import dev.namph.redis.store.TTLStore;
 import dev.namph.redis.store.impl.*;
 import dev.namph.redis.util.Singleton;
@@ -45,6 +46,8 @@ public class RedisServer {
         MemoryManager memoryManager = new MemoryManager(evictionPolicy, store);
         commandRegistry = new CommandRegistry(store, encoder, ttlStore, memoryManager);
         ttlManager = new TTLManager(ttlStore, store);
+        PersistenceStrategy persistenceDB = new RdbPersistence();
+        persistenceDB.load(store);
     }
 
     /**
