@@ -42,6 +42,7 @@ public class RdbPersistence implements PersistenceStrategy {
                     }
                     case RedisValue.Type.SET -> {
                         out.writeByte(RdbType.RDB_TYPE_SET);
+                        RdbIO.writeBytes(out, keyByte);
                         var setVal = (RedisSet) val;
                         RdbIO.writeLength(out, setVal.size());
                         for (Key k : setVal.getAll()) {
@@ -50,6 +51,7 @@ public class RdbPersistence implements PersistenceStrategy {
                     }
                     case RedisValue.Type.LIST -> {
                         out.writeByte(RdbType.RDB_TYPE_LIST);
+                        RdbIO.writeBytes(out, keyByte);
                         QuickList list = (QuickList) val;
                         RdbIO.writeLength(out, (int) list.size());
                         for (long i = 0; i < list.size(); i++) {
@@ -58,6 +60,7 @@ public class RdbPersistence implements PersistenceStrategy {
                     }
                     case RedisValue.Type.ZSET -> {
                         out.writeByte(RdbType.RDB_TYPE_ZSET);
+                        RdbIO.writeBytes(out, keyByte);
                         ZSet set = (ZSet) val;
                         RdbIO.writeLength(out, set.size());
                         for (ZSet.Entry zEntry : set.getAll()) {
@@ -67,6 +70,7 @@ public class RdbPersistence implements PersistenceStrategy {
                     }
                     case RedisValue.Type.HASH -> {
                         out.writeByte(RdbType.RDB_TYPE_HASH);
+                        RdbIO.writeBytes(out, keyByte);
                         RedisHash hash = (RedisHash) val;
                         RdbIO.writeLength(out, hash.size());
                         for (RedisHash.Entry hEntry : hash.getAll()) {

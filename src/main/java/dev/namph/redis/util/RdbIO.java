@@ -32,7 +32,7 @@ public class RdbIO {
             int second = in.readUnsignedByte();
             return ((first & 0x3F) << 8) | second;
         } else if (type == 2) {
-            return in.readInt();
+            return in.readUnsignedByte();
         } else {
             throw new IOException("Special encoding not implemented yet");
         }
