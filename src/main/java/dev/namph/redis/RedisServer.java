@@ -3,10 +3,7 @@ package dev.namph.redis;
 import dev.namph.redis.cmd.impl.CommandRegistry;
 import dev.namph.redis.net.Connection;
 import dev.namph.redis.resp.ProtocolEncoder;
-import dev.namph.redis.store.EvictionPolicy;
-import dev.namph.redis.store.IStore;
-import dev.namph.redis.store.PersistenceStrategy;
-import dev.namph.redis.store.TTLStore;
+import dev.namph.redis.store.*;
 import dev.namph.redis.store.impl.*;
 import dev.namph.redis.util.Singleton;
 import org.slf4j.Logger;
@@ -32,6 +29,8 @@ public class RedisServer {
     private final CommandRegistry commandRegistry;
     private final long CLEANUP_INTERVAL_MS = 100; // 100ms
     private final TTLManager ttlManager;
+    private final SaveRuleManager saveRuleManager;
+    private final DirtyTracker dirtyTracker;
 
     /**
      * Constructor for RedisServer.
@@ -40,7 +39,8 @@ public class RedisServer {
     public RedisServer(Integer port) {
         this.port = port != null ? port : DEFAULT_PORT;
         ttlStore = new SimpleTTLStore<>();
-        store = new KeyValueStore(ttlStore);
+        dirtyTracker = new SimpleDirtyTracker();
+        store = new KeyValueStore(ttlStore, dirtyTracker);
         encoder = Singleton.getResp2Encoder();
         EvictionPolicy<Key> evictionPolicy = new AllKeysLRU(store);
         MemoryManager memoryManager = new MemoryManager(evictionPolicy, store);
@@ -48,6 +48,7 @@ public class RedisServer {
         ttlManager = new TTLManager(ttlStore, store);
         PersistenceStrategy persistenceDB = new RdbPersistence();
         persistenceDB.load(store);
+        saveRuleManager = new SaveRuleManager();
     }
 
     /**
@@ -66,11 +67,18 @@ public class RedisServer {
             logger.info("Redis server started on " + port);
 
             long lastCleanupTime = System.currentTimeMillis();
+            long lastSaveTime = System.currentTimeMillis();
             while (true) {
                 long currentTime = System.currentTimeMillis();
                 if (currentTime - lastCleanupTime >= CLEANUP_INTERVAL_MS) {
                     ttlManager.activeExpireCycle();
                     lastCleanupTime = currentTime;
+                }
+                if (saveRuleManager.shouldSave(dirtyTracker.getDirty(), lastSaveTime)) {
+                    Runnable saveTask = this::rdbSave;
+                    new Thread(saveTask).start();
+                    dirtyTracker.reset();
+                    lastSaveTime = System.currentTimeMillis();;
                 }
                 selector.select((int) CLEANUP_INTERVAL_MS); // Wait for events
                 var selectedKeys = selector.selectedKeys();
@@ -122,6 +130,11 @@ public class RedisServer {
             logger.error("Failed to start Redis server on port " + port, e);
             throw new RuntimeException("Failed to start Redis server", e);
         }
+    }
+
+    private void rdbSave() {
+        PersistenceStrategy persistenceDB = new RdbPersistence();
+        persistenceDB.save(store);
     }
 
     /**
